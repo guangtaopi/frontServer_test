@@ -1,0 +1,22 @@
+<component name="libraryTable">
+  <library name="Maven: cn.v5:base_server:v0.1.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/cn/v5/base_server/v0.1.0-SNAPSHOT/base_server-v0.1.0-20140219.073529-3.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/cn/v5/base_server/v0.1.0-SNAPSHOT/base_server-v0.1.0-20140219.073529-3-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../../refactor/hw_base/hw_base_server/netty4/src/main/java" />
+      <root url="file://$PROJECT_DIR$/../../refactor/hw_base/hw_base_server/samples/src/main/java" />
+      <root url="file://$PROJECT_DIR$/../../refactor/hw_base/hw_base_server/base_server/src/main/java" />
+      <root url="file://$PROJECT_DIR$/../../refactor/hw_base/hw_base_server/base_server/src/test/java" />
+      <root url="file://$PROJECT_DIR$/../../refactor/hw_base/hw_base_server/server_common/src/main/java" />
+      <root url="file://$PROJECT_DIR$/../../refactor/hw_base/hw_base_server/server_common/src/test/java" />
+      <root url="file://$PROJECT_DIR$/../../refactor/hw_base/hw_base_server/msgpush_server/src/test/java" />
+      <root url="file://$PROJECT_DIR$/../../refactor/hw_base/hw_base_server/zookeeperClient/src/main/java" />
+      <root url="file://$PROJECT_DIR$/../../refactor/hw_base/hw_base_server/zookeeperClient/src/test/java" />
+      <root url="jar://$MAVEN_REPOSITORY$/cn/v5/base_server/v0.1.0-SNAPSHOT/base_server-v0.1.0-20140219.073529-3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

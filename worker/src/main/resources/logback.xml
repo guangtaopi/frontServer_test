@@ -1,0 +1,98 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%line] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <appender name="test" class="ch.qos.logback.core.FileAppender">
+        <file>./test.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>frontServer.%i.log.zip</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>3</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>100MB</maxFileSize>
+        </triggeringPolicy>
+
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-4relative [%thread] %-5level %logger{35} [%line] - %msg%n</pattern>
+        </encoder>
+
+    </appender>
+
+    <appender name="worker" class="ch.qos.logback.core.FileAppender">
+        <file>./logs/worker.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>logic.%i.log.zip</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>3</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>100MB</maxFileSize>
+        </triggeringPolicy>
+
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-4relative [%thread] %-5level %logger{35} [%line] - %msg%n</pattern>
+        </encoder>
+
+    </appender>
+
+    <appender name="network" class="ch.qos.logback.core.FileAppender">
+        <file>./logs/network.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>network.%i.log.zip</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>3</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>100MB</maxFileSize>
+        </triggeringPolicy>
+
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-4relative [%thread] %-5level %logger{35} [%line] - %msg%n</pattern>
+        </encoder>
+
+    </appender>
+
+    <appender name="performance" class="ch.qos.logback.core.FileAppender">
+        <file>./logs/performance.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>frontServer.%i.log.zip</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>3</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>100MB</maxFileSize>
+        </triggeringPolicy>
+
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-4relative [%thread]  %-5level %logger{35} [%line] - %msg%n</pattern>
+        </encoder>
+
+    </appender>
+
+    <logger name="io.netty" level="WARN">
+        <appender-ref ref="network"/>
+    </logger>
+
+    <logger name="com.v5.test.worker" level="WARN">
+        <appender-ref ref="worker"/>
+    </logger>
+
+    <logger name="com.metrics" level="debug">
+        <appender-ref ref="performance" />
+    </logger>
+
+    <root level="WARN">
+        <appender-ref ref="test"/>
+    </root>
+</configuration>

@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Maven: cn.v5:front_server:v0.1.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/cn/v5/front_server/v0.1.0-SNAPSHOT/front_server-v0.1.0-20140327.115915-5.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/cn/v5/front_server/v0.1.0-SNAPSHOT/front_server-v0.1.0-20140327.115915-5-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/cn/v5/front_server/v0.1.0-SNAPSHOT/front_server-v0.1.0-20140327.115915-5-sources.jar!/" />
+      <root url="file://D:/duduworkspace/c04b01/front_server/src/main/java" />
+      <root url="file://D:/duduworkspace/c04b01/front_server/src/test/java" />
+    </SOURCES>
+  </library>
+</component>
