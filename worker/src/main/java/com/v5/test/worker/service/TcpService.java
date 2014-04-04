@@ -26,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.nio.charset.Charset;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by piguangtao on 14-2-18.
@@ -34,11 +36,14 @@ public class TcpService implements InitializingBean{
 
     private static Logger LOGGER = LoggerFactory.getLogger(TcpService.class);
 
-    @Value("${tcpServer.ip}")
-    private String tcpIp;
+    @Value("${tcpServer.urls}")
+    private String tcpServerUrls;
 
-    @Value("${tcpServer.port}")
-    private short tcpPort;
+//    @Value("${tcpServer.ip}")
+//    private String tcpIp;
+//
+//    @Value("${tcpServer.port}")
+//    private short tcpPort;
 
     @Autowired
     private EventLoopGroup eventLoopGroup;
@@ -62,10 +67,31 @@ public class TcpService implements InitializingBean{
 
     private Meter ackMsgMeter;
 
+    private String[][] frontServers;
+
+    private AtomicInteger loginIndex = new AtomicInteger(1);
+
     @Override
     public void afterPropertiesSet() throws Exception {
         sendMsgMeter = metrics.meter("send-msg-meter.");
         ackMsgMeter = metrics.meter("ack-msg-meter");
+        initTcpServer();
+    }
+
+    private void initTcpServer(){
+        try{
+            String[] tcpServerArrary = tcpServerUrls.split(",");
+            frontServers = new String[tcpServerArrary.length][2];
+            for(int i = 0;i<tcpServerArrary.length;i++){
+                String[] tcpServer = tcpServerArrary[i].split(":");
+                frontServers[i][0] = tcpServer[0];
+                frontServers[i][1]= tcpServer[1];
+            }
+        }
+        catch (Exception e){
+            LOGGER.error("Fails to init tcpServer.and exit.",e);
+            System.exit(-1);
+        }
     }
 
     public void connect(final String userMd5) {
@@ -76,8 +102,9 @@ public class TcpService implements InitializingBean{
                 .channel(NioSocketChannel.class)
                 .handler(clientChannelInitializer);
 
+        String[] tcpServer = frontServers[frontServers.length % loginIndex.getAndIncrement()];
 
-        bootstrap.connect(tcpIp, tcpPort).addListener(new ChannelFutureListener() {
+        bootstrap.connect(tcpServer[0], Integer.valueOf(tcpServer[1])).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
@@ -161,5 +188,7 @@ public class TcpService implements InitializingBean{
             eventPublisher.send(EventPath.USER_MSG_SEND,from,to,content,System.currentTimeMillis());
         }
     }
+
+
 
 }
