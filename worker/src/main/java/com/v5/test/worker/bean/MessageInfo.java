@@ -17,6 +17,8 @@ public class MessageInfo {
 
     private Long receiveTime;
 
+    private Long seq;
+
     public String getFrom() {
         return from;
     }
@@ -57,13 +59,19 @@ public class MessageInfo {
         this.receiveTime = receiveTime;
     }
 
+    public Long getSeq() {
+        return seq;
+    }
+
+    public void setSeq(Long seq) {
+        this.seq = seq;
+    }
 
     public final static EventFactory<MessageInfo> EVENT_FACTORY = new EventFactory<MessageInfo>() {
         public MessageInfo newInstance() {
             return new MessageInfo();
         }
     };
-
 
     @Override
     public String toString() {
@@ -73,6 +81,7 @@ public class MessageInfo {
         sb.append(", content='").append(content).append('\'');
         sb.append(", sendTime=").append(sendTime);
         sb.append(", receiveTime=").append(receiveTime);
+        sb.append(", seq=").append(seq);
         sb.append('}');
         return sb.toString();
     }

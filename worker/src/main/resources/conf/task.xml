@@ -10,4 +10,6 @@
 
     <bean id="userLoginTask" class="com.v5.test.worker.task.UserLoginTask" />
 
+    <bean name="messageLogService" class="com.v5.test.worker.service.MessageLogService" />
+
 </beans>

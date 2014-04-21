@@ -27,11 +27,11 @@ public class UserLoginTask extends Thread implements InitializingBean {
 
     private String phonePrefix = "100000000";
 
-    @Value("${test.user.index.start}")
-    private int start;
+    @Value("${text.main.content.seq.start}")
+    private int startSeq;
 
-    @Value("${test.user.count}")
-    private int userCount;
+    @Value("${text.main.content.seq.end}")
+    private int endSeq;
 
     @Autowired
     private HttpService httpService;
@@ -49,7 +49,7 @@ public class UserLoginTask extends Thread implements InitializingBean {
 
     public void run() {
         LOGGER.debug("start to bind device.");
-        for (int i = start; i < start + userCount; i++) {
+        for (int i = startSeq; i <= endSeq; i++) {
             if(loginFromHttpServer){
                 loginFromHttpServer(i);
             }

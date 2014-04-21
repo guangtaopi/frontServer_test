@@ -84,7 +84,7 @@
         <appender-ref ref="network"/>
     </logger>
 
-    <logger name="com.v5.test.worker" level="WARN">
+    <logger name="com.v5.test.worker" level="debug">
         <appender-ref ref="worker"/>
     </logger>
 

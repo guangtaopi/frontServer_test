@@ -102,7 +102,7 @@ public class TcpService implements InitializingBean{
                 .channel(NioSocketChannel.class)
                 .handler(clientChannelInitializer);
 
-        String[] tcpServer = frontServers[frontServers.length % loginIndex.getAndIncrement()];
+        String[] tcpServer = frontServers[loginIndex.getAndIncrement()%frontServers.length];
 
         bootstrap.connect(tcpServer[0], Integer.valueOf(tcpServer[1])).addListener(new ChannelFutureListener() {
             @Override

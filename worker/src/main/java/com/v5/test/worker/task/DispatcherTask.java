@@ -1,15 +1,16 @@
 package com.v5.test.worker.task;
 
 import com.lmax.disruptor.RingBuffer;
+import com.v5.base.event.EventPublisher;
 import com.v5.test.worker.bean.MessageInfo;
 import com.v5.test.worker.bean.TaskSnapshort;
-import com.v5.test.worker.constant.SystemConstant;
+import com.v5.test.worker.constant.EventPath;
+import com.v5.test.worker.util.MsgContentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import sun.print.resources.serviceui_zh_TW;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -30,7 +31,22 @@ public class DispatcherTask extends Thread implements InitializingBean {
     @Autowired
     private RingBufferDispatcher dispatcher;
 
-    private AtomicLong seq = new AtomicLong(0);
+    @Value("${text.main.content.seq.start}")
+    private long startSeq;
+
+    @Value("${text.main.content.seq.end}")
+    private long endSeq;
+
+    @Value("${test.send.time}")
+    private int sendTime;
+
+    @Value("${test.send.msg.total}")
+    private int msgTotal;
+
+    @Autowired
+    private EventPublisher eventPublisher;
+
+    private AtomicLong seq;
 
     String from = null;
 
@@ -40,12 +56,15 @@ public class DispatcherTask extends Thread implements InitializingBean {
 
     private Integer count = new Integer(0);
 
-    public DispatcherTask(){
+    private long startSendTime = 0;
+
+    public DispatcherTask() {
         super("Task-dispatcher-thread.");
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        seq = new AtomicLong(startSeq);
         start();
     }
 
@@ -67,13 +86,21 @@ public class DispatcherTask extends Thread implements InitializingBean {
             while (true) {
                 String userMd5 = TaskSnapshort.loginedUserSet.take();
                 TaskSnapshort.loginedUserSet.put(userMd5);
-                if(null == from){
+                if (null == from) {
                     from = userMd5;
                     continue;
-                }
-                else{
+                } else {
                     to = userMd5;
-                    publishEvent();
+                    long seqNum = seq.getAndIncrement();
+                    if (0 == startSendTime) {
+                        startSendTime = System.currentTimeMillis();
+                    }
+                    if (isOver(seqNum)) {
+                        eventPublisher.send(EventPath.TASK_SEND_OVER);
+                        LOGGER.info("task send over.");
+                        return;
+                    }
+                    publishEvent(seqNum);
                     count++;
                     reset();
                     controllRate();
@@ -84,42 +111,45 @@ public class DispatcherTask extends Thread implements InitializingBean {
         }
     }
 
-    private void publishEvent(){
+    private void publishEvent(long seqNum) {
+
         RingBuffer<MessageInfo> ringBuffer = dispatcher.getDisruptor().getRingBuffer();
         long sequence = ringBuffer.next();
         MessageInfo messageInfo = ringBuffer.get(sequence);
         messageInfo.setFrom(from);
         messageInfo.setTo(to);
-        messageInfo.setContent(formContent());
+
+        messageInfo.setSeq(seqNum);
+        messageInfo.setContent(MsgContentUtil.getContent(seqNum, textMainContent));
         ringBuffer.publish(sequence);
-        if(null == beginDispatchTime){
+        if (null == beginDispatchTime) {
             beginDispatchTime = System.currentTimeMillis();
             count = 0;
         }
     }
 
-    public void reset(){
+    public void reset() {
         from = null;
         to = null;
     }
 
 
-    public void controllRate(){
+    private boolean isOver(long seqNum) {
+        return seqNum > msgTotal || (System.currentTimeMillis() - startSendTime > sendTime * 1000);
+    }
+
+    public void controllRate() {
         long sendTime = System.currentTimeMillis() - beginDispatchTime;
-        if(count >= rate){
+        if (count >= rate) {
             try {
-                if(sendTime < 1000){
+                if (sendTime < 1000) {
                     Thread.sleep(1000 - sendTime);
                 }
                 beginDispatchTime = System.currentTimeMillis();
                 count = 0;
             } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(),e);
+                LOGGER.error(e.getMessage(), e);
             }
         }
-    }
-
-    private String formContent(){
-       return seq+ SystemConstant.TEXT_SEQ_CONTEXT_SPLIT+textMainContent;
     }
 }

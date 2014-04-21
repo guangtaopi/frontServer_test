@@ -20,5 +20,7 @@ public interface EventPath {
 
     String USER_MSG_RECEIVE = "/test/user/msg/receive";
 
+    String TASK_SEND_OVER = "/task/send/over";
+
 
 }
