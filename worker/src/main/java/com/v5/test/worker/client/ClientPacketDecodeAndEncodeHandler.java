@@ -40,6 +40,7 @@ public class ClientPacketDecodeAndEncodeHandler extends MessageToMessageCodec<By
         clientChannel = new ClientChannelNettyImpl(ctx);
 
         eventPublisher.send(EventPath.USER_TCP_CONNECTED, ctx);
+
     }
 
     @Override
@@ -94,10 +95,10 @@ public class ClientPacketDecodeAndEncodeHandler extends MessageToMessageCodec<By
                 LOGGER.warn("not found decode for packet type {}", head.getPacketType());
             }
         } catch (IndexOutOfBoundsException e) {
-            LOGGER.error("decode error: {}", e.getMessage());
+            LOGGER.error("decode error: {}", e);
             ctx.close();
         } catch (NoLoginedException e) {
-            LOGGER.error("no logined, close.");
+            LOGGER.error("no logined, close.",e);
             ctx.close();
         }
     }
@@ -109,7 +110,7 @@ public class ClientPacketDecodeAndEncodeHandler extends MessageToMessageCodec<By
         packet.setVersion(buf.readByte());
         packet.setPacketType(buf.readByte());
         packet.setSecret(buf.readByte());
-        long g = buf.readUnsignedShort() << 32;
+        long g = ((long)buf.readUnsignedShort()) << 32;
         packet.setTimestamp(buf.readInt() + g);
         packet.setTempId(buf.readUnsignedShort());
         packet.setPacketSize(buf.readUnsignedShort());

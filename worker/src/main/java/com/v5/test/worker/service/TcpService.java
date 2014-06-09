@@ -5,7 +5,9 @@ import com.codahale.metrics.MetricRegistry;
 import com.v5.base.client.ClientChannel;
 import com.v5.base.client.OnlineClient;
 import com.v5.base.event.EventPublisher;
+import com.v5.base.message.command.CallPacket;
 import com.v5.base.message.command.LoginPacket;
+import com.v5.base.message.notify.SystemNotifyPackage;
 import com.v5.base.message.text.*;
 import com.v5.base.utils.DefaultCallBack;
 import com.v5.test.worker.bean.MessageInfo;
@@ -119,7 +121,6 @@ public class TcpService implements InitializingBean{
     public void login(final Channel channel) {
         String userMd5 = onclientManager.getUserByChannel(channel);
         String sessionId = onclientManager.getSessionByNameMd5(userMd5);
-
         final LoginPacket loginPacket = new LoginPacket();
         loginPacket.setSessionId(sessionId);
 
@@ -164,7 +165,7 @@ public class TcpService implements InitializingBean{
             public void success(OnlineClient result) {
                 result.getClientChannel().write(packet);
                 sendMsgMeter.mark();
-                publishSendMsg(packet.getFrom(),packet.getToUser(),new String(packet.getContent(),Charset.forName("utf-8")));
+                publishSendMsg(packet.getFrom(),packet.getToUser(),messageInfo.getContent());
             }
         });
     }
@@ -183,11 +184,38 @@ public class TcpService implements InitializingBean{
 
     }
 
+
+    public void sendVideoCall(final String from,final CallPacket callPacket){
+        onclientManager.getClient(from, new DefaultCallBack<OnlineClient>() {
+            @Override
+            public void success(OnlineClient result) {
+                result.getClientChannel().write(callPacket);
+            }
+        });
+    }
+
+
+    public void sendSystemNofify(final String from,final SystemNotifyPackage notifyPackage){
+        onclientManager.getClient(from, new DefaultCallBack<OnlineClient>() {
+            @Override
+            public void success(OnlineClient result) {
+                result.getClientChannel().write(notifyPackage);
+            }
+        });
+    }
+
+
     private void publishSendMsg(String from,String to,String content){
         if("yes".equalsIgnoreCase(enableStatisticMsgdelay)){
             eventPublisher.send(EventPath.USER_MSG_SEND,from,to,content,System.currentTimeMillis());
         }
     }
+
+
+
+
+
+
 
 
 

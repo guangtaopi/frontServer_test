@@ -1,29 +1,32 @@
 package com.v5.test.worker.service;
 
-import com.v5.base.utils.AsyncInvokeExceptoin;
-import com.v5.base.utils.SimpleCallback;
 import com.v5.test.worker.bean.MessageInfo;
 import com.v5.test.worker.bean.TaskSnapshort;
-import com.v5.test.worker.bean.User;
 import com.v5.test.worker.client.ClientOnclientManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.spel.ast.TypeReference;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
  * Created by piguangtao on 14-3-18.
+ * 前置条件:
+ * 用户连接准备：
+ *      用户连接tcpServer-->ClientPacketDecodeAndEncodeHandler#channelActive-->EventHandler#tcpConnectSuccess-->tcpService.login(ctx.channel());
+ * 用户业务测试:
+ *      获取成功登录的用户:
+ *       TaskSnapshort.loginedUserSet.take();
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("/conf/main_test.xml")
 public class TcpServiceTest {
-    String mobile = "13770508309";
     @Autowired
     private HttpService httpService;
 
@@ -35,32 +38,19 @@ public class TcpServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        //http登录
-        final CountDownLatch latch = new CountDownLatch(1);
-        final User finalUser = new User();
-        for(int i = 0;i<20;i++){
-            String mobile = "138705083010"+i;
-            httpService.bindDevice(mobile, true, new SimpleCallback<User, AsyncInvokeExceptoin>() {
-                @Override
-                public void success(User user) {
-                    System.out.format("user: %s", user);
-                    finalUser.setId(user.getId());
-                    finalUser.setSessionId(user.getSessionId());
-                    finalUser.setAppId(user.getAppId());
-                    latch.countDown();
-                }
+        //支持进行tcp登录，在数据库中需要有用户的记录，包括
+        //insert into user_session_indexes(session_id,user_id,app_id) values('cfcd208495d565ef66e7dff9f98764da','c4ca4238a0b923820dcc509a6f75849b',0);
+        //insert into user_sessions(session_id,user_id,app_id) values('cfcd208495d565ef66e7dff9f98764da','c4ca4238a0b923820dcc509a6f75849b',0);
+        //insert into users(id,nickname,user_type,mobile_verify,app_id,create_time) values('c4ca4238a0b923820dcc509a6f75849b','test',0,0,0,'2014-03-11 13:40:14+0800');
+        List<String> userIds = new ArrayList<>();
+        userIds.add("c4ca4238a0b923820dcc509a6f75849b");
 
-                @Override
-                public void failure(AsyncInvokeExceptoin exceptoin) {
-                    System.out.format("user: %s", exceptoin);
-                    latch.countDown();
-                    return;
-                }
-            });
+        //初始化用户的nameMd5和sessionId
+        onclientManager.saveSession("cfcd208495d565ef66e7dff9f98764da", "c4ca4238a0b923820dcc509a6f75849b");
+
+        for(int i = 0;i<userIds.size();i++){
+            tcpService.connect(userIds.get(i));
         }
-
-
-        latch.await();
     }
 
     @After
@@ -69,8 +59,9 @@ public class TcpServiceTest {
     }
 
     @Test
-    public void testConnect() throws Exception {
-
+    public void testHeatBeat() throws InterruptedException {
+        CountDownLatch latch =new CountDownLatch(1);
+        latch.await();
     }
 
     @Test
@@ -80,6 +71,7 @@ public class TcpServiceTest {
 
     @Test
     public void testSendSimpleMessagePacket() throws Exception {
+        String to = "88888888888888888888888888888888";
         //http 登录成功后，会自动tcp连接和登录
         while (true){
             String userId = TaskSnapshort.loginedUserSet.take();
@@ -91,7 +83,6 @@ public class TcpServiceTest {
                 tcpService.sendSimpleMessagePacket(tcpService.formTextSimpleMessagePacket(messageInfo));
             }
         }
-//        noExit();
     }
 
     @Test
@@ -118,5 +109,4 @@ public class TcpServiceTest {
             }
         }
     }
-
 }

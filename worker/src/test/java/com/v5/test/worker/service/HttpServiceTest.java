@@ -1,6 +1,7 @@
 package com.v5.test.worker.service;
 
-import com.v5.base.utils.AsyncInvokeExceptoin;
+import com.v5.base.utils.AsyncInvokeException;
+import com.v5.base.utils.AsyncInvokeException;
 import com.v5.base.utils.SimpleCallback;
 import com.v5.test.worker.bean.User;
 import org.junit.After;
@@ -37,7 +38,7 @@ public class HttpServiceTest {
     public void testBindDevice() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         String mobile = "13770508309";
-        httpService.bindDevice(mobile, true, new SimpleCallback<User, AsyncInvokeExceptoin>() {
+        httpService.bindDevice(mobile, true, new SimpleCallback<User, AsyncInvokeException>() {
             @Override
             public void success(User user) {
                 System.out.format("user: %s",user);
@@ -45,7 +46,7 @@ public class HttpServiceTest {
             }
 
             @Override
-            public void failure(AsyncInvokeExceptoin exceptoin) {
+            public void failure(AsyncInvokeException exceptoin) {
                 System.out.format("user: %s",exceptoin);
                 latch.countDown();
             }

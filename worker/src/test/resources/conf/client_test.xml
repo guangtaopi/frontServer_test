@@ -4,7 +4,11 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean name="CommandDecoderAndEncoder" class="com.v5.base.message.command.CommandDecoderAndEncoder" />
+    <bean name="CommandDecoderAndEncoder" class="com.v5.test.worker.client.CommandDecoderAndEncoder" />
+
+    <bean name="simpleMessageDecoderAndEncoder" class="com.v5.test.worker.client.SimpleMessageDecoderAndEncoder" />
+
+    <bean name="systemNotifyDecoderAndEncoder" class="com.v5.base.message.notify.SystemNotifyPackageEncoderAndDecoder" />
 
     <bean name="heartbeatHandler" class="com.v5.test.worker.client.HeartbeatHandler" />
 
@@ -12,12 +16,27 @@
 
     <bean name="clientChannelInitializer" class="com.v5.test.worker.client.ClientChannelInitializer" />
 
-    <bean name="simpleMessageDecoderAndEncoder" class="com.v5.base.message.text.SimpleMessageDecoderAndEncoder" />
-
     <bean name="sslUtil" class="com.v5.test.worker.ssl.SSLUtil" />
 
     <bean name="TextMessageHandler" class="com.v5.test.worker.client.TextMessageHandler" />
 
     <bean name="forwardMessageHandler" class="com.v5.test.worker.client.ForwardMessageHandler" />
+
+    <bean name="imageMessageHandler" class="com.v5.test.worker.client.ImageMessageHandler" />
+
+    <bean name="audioMessageHandler" class="com.v5.test.worker.client.VoiceMessageHandler" />
+
+    <bean name="statusMessageHandler" class="com.v5.test.worker.client.StatusMessageHandler" />
+
+   <bean name="systemNofifyHandler" class="com.v5.test.worker.client.SystemNotifyHandler" />
+
+    <bean name="callHandler" class="com.v5.test.worker.client.CallHandler" />
+
+    <bean name="udpServerPacketHandler" class="com.v5.test.worker.client.UDPServerPacketHandler" />
+
+    <bean name="messageLogService" class="com.v5.test.worker.service.MessageLogService" />
+
+    <bean name="testResultHandler" class="com.v5.test.worker.AutoTest" />
+
 
 </beans>

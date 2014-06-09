@@ -50,7 +50,7 @@ public class ClientChannelInitializer extends ChannelInitializer {
         }
 
         ch.pipeline().addLast("logger", new LoggingHandler(LogLevel.DEBUG))
-                .addLast("keep_alive", new IdleStateHandler(0, 10, 0, TimeUnit.SECONDS))
+                .addLast("keep_alive", new IdleStateHandler(0, 60, 0, TimeUnit.SECONDS))
                 .addLast("frame_decoder", new LengthFieldBasedFrameDecoder(65551, 12, 2, 2, 0, true))
                 .addLast("base_decode_encoder", decodeEncoderHandler());
     }

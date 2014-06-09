@@ -8,7 +8,7 @@ import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
 import com.v5.base.event.EventPublisher;
-import com.v5.base.utils.AsyncInvokeExceptoin;
+import com.v5.base.utils.AsyncInvokeException;
 import com.v5.base.utils.SimpleCallback;
 import com.v5.test.worker.bean.TaskSnapshort;
 import com.v5.test.worker.bean.User;
@@ -27,7 +27,7 @@ public class HttpService implements InitializingBean {
 
     private static Logger LOGGER = LoggerFactory.getLogger(HttpService.class);
 
-    private String httpUrl = "http://192.168.1.232:9101";
+    private String httpUrl = "http://192.168.1.241:9101";
 
     @Autowired
     private EventPublisher eventPublisher;
@@ -47,7 +47,7 @@ public class HttpService implements InitializingBean {
     }
 
 
-    public void bindDevice(final String mobile, boolean isAuthcode,final SimpleCallback<User,AsyncInvokeExceptoin> callback) throws IOException {
+    public void bindDevice(final String mobile, boolean isAuthcode,final SimpleCallback<User,AsyncInvokeException> callback) throws IOException {
 
         AsyncHttpClient.BoundRequestBuilder requestBuilder = asyncHttpClient.preparePost(httpUrl + "/api/user/bind/device");
         requestBuilder.addParameter("mobile", mobile).addParameter("device_type", "2")
@@ -76,12 +76,12 @@ public class HttpService implements InitializingBean {
                             }
                         } catch (Exception e) {
                             if(null != callback){
-                                callback.failure(new AsyncInvokeExceptoin(e.getMessage(),e));
+                                callback.failure(new AsyncInvokeException(e.getMessage(),e));
                             }
                         }
                     } catch (Exception e) {
                         LOGGER.error("mobile:{} response body error.", mobile, e);
-                        callback.failure(new AsyncInvokeExceptoin(e.getMessage(),e));
+                        callback.failure(new AsyncInvokeException(e.getMessage(),e));
                     }
                 }
                 return null;
@@ -89,7 +89,7 @@ public class HttpService implements InitializingBean {
         });
     }
 
-    public void login(final String name, final String password, final SimpleCallback<User, AsyncInvokeExceptoin> callback) throws IOException {
+    public void login(final String name, final String password, final SimpleCallback<User, AsyncInvokeException> callback) throws IOException {
 
         TaskSnapshort.getInstance().getHttpLoginUserNum().getAndIncrement();
 

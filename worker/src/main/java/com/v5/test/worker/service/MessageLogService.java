@@ -126,12 +126,12 @@ public class MessageLogService implements InitializingBean {
         MessageInfo messageInfo = new MessageInfo();
         messageInfo.setFrom(from);
         messageInfo.setTo(to);
-        messageInfo.setSeq(Long.valueOf(MsgContentUtil.getSeqFromContent(content)));
         messageInfo.setContent(MsgContentUtil.getValidContent(content));
         messageInfo.setSendTime(receiveTime);
         try {
+            messageInfo.setSeq(Long.valueOf(MsgContentUtil.getSeqFromContent(content)));
             recevieMessageQueue.put(messageInfo);
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
     }

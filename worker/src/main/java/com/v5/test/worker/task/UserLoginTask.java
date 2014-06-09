@@ -1,7 +1,8 @@
 package com.v5.test.worker.task;
 
 import com.v5.base.event.EventPublisher;
-import com.v5.base.utils.AsyncInvokeExceptoin;
+import com.v5.base.utils.AsyncInvokeException;
+import com.v5.base.utils.AsyncInvokeException;
 import com.v5.base.utils.DefaultCallBack;
 import com.v5.base.utils.SimpleCallback;
 import com.v5.test.worker.bean.User;
@@ -70,7 +71,7 @@ public class UserLoginTask extends Thread implements InitializingBean {
     private void loginFromHttpServer(int num) {
         final String mobile = phonePrefix + num;
         try {
-            bindDevice(mobile, false, new SimpleCallback<Boolean, AsyncInvokeExceptoin>() {
+            bindDevice(mobile, false, new SimpleCallback<Boolean, AsyncInvokeException>() {
                 @Override
                 public void success(Boolean aBoolean) {
                     if (!aBoolean) {
@@ -79,7 +80,7 @@ public class UserLoginTask extends Thread implements InitializingBean {
                 }
 
                 @Override
-                public void failure(AsyncInvokeExceptoin exceptoin) {
+                public void failure(AsyncInvokeException exceptoin) {
                     reBindDeviceWithAuthcode(mobile);
                 }
             });
@@ -88,15 +89,15 @@ public class UserLoginTask extends Thread implements InitializingBean {
         }
     }
 
-    private void bindDevice(final String mobile, boolean isAuth, final SimpleCallback<Boolean, AsyncInvokeExceptoin> callback) throws Exception {
-        httpService.bindDevice(mobile, isAuth, new SimpleCallback<User, AsyncInvokeExceptoin>() {
+    private void bindDevice(final String mobile, boolean isAuth, final SimpleCallback<Boolean, AsyncInvokeException> callback) throws Exception {
+        httpService.bindDevice(mobile, isAuth, new SimpleCallback<User, AsyncInvokeException>() {
             @Override
             public void success(User user) {
                 callback.success(true);
             }
 
             @Override
-            public void failure(AsyncInvokeExceptoin exceptoin) {
+            public void failure(AsyncInvokeException exceptoin) {
                 callback.failure(exceptoin);
             }
         });
@@ -104,13 +105,13 @@ public class UserLoginTask extends Thread implements InitializingBean {
 
     private void reBindDeviceWithAuthcode(final String mobile) {
         try {
-            httpService.bindDevice(mobile, true, new SimpleCallback<User, AsyncInvokeExceptoin>() {
+            httpService.bindDevice(mobile, true, new SimpleCallback<User, AsyncInvokeException>() {
                 @Override
                 public void success(User user) {
                 }
 
                 @Override
-                public void failure(AsyncInvokeExceptoin exceptoin) {
+                public void failure(AsyncInvokeException exceptoin) {
                     LOGGER.error("mobile:{} fails to bind device with authcode.", mobile, exceptoin);
                 }
             });

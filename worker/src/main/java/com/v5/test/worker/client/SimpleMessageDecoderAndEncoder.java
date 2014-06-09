@@ -1,10 +1,12 @@
 package com.v5.test.worker.client;
 
+import cn.v5.common.utils.MD5;
 import com.v5.base.message.text.*;
 import com.v5.base.packet.PacketDecoder;
 import com.v5.base.packet.PacketEncoder;
 import com.v5.base.packet.PacketHead;
 import com.v5.base.utils.ByteBufUtils;
+import com.v5.test.worker.packet.StatusResponsePackage;
 import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,26 +30,21 @@ public class SimpleMessageDecoderAndEncoder implements PacketDecoder<SimpleMessa
     @Override
     public void encode(SimpleMessagePacket msg, ByteBuf buf) {
         switch (msg.getPacketType()) {
-
             case TextMessagePacket.TEXT_MESSAGE_PACKET_TYPE: {
                 buf.writeByte(TextMessagePacket.TEXT_MESSAGE_TYPE);
-
                 //发给个人消息
                 if (msg.getFromGroup() == null) {
                     buf.writeByte(TextMessagePacket.TO_USER);
-                    ByteBufUtils.writeUTF8String(buf, msg.getFrom());
+                    ByteBufUtils.writeUTF8String(buf, msg.getToUser());
                 } else {
                     //发送群组消息
                     buf.writeByte(TextMessagePacket.TO_GROUP);
                     ByteBufUtils.writeUTF8String(buf, msg.getFromGroup());
                     ByteBufUtils.writeUTF8String(buf, msg.getFrom());
                 }
-//                ByteBufUtils.writeUTF8StringPrefix2ByteLength(buf, msg.getContent());
                 ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, msg.getContent());
-                if(null != msg.getMessageId()){
-                    buf.writeLong(msg.getMessageId());
-                }
-
+                buf.writeByte(0x00);
+                ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, MD5.getMD5(String.valueOf(System.currentTimeMillis())).getBytes());
                 break;
             }
 
@@ -55,17 +52,15 @@ public class SimpleMessageDecoderAndEncoder implements PacketDecoder<SimpleMessa
                 buf.writeByte(ImageMessagePacket.IMAGE_URL_MESSAGE_TYPE);
                 if (msg.getFromGroup() == null) {
                     buf.writeByte(ImageMessagePacket.TO_USER);
-                    ByteBufUtils.writeUTF8String(buf, msg.getFrom());
+                    ByteBufUtils.writeUTF8String(buf, msg.getToUser());
                 } else {
                     buf.writeByte(ImageMessagePacket.TO_GROUP);
                     ByteBufUtils.writeUTF8String(buf, msg.getFromGroup());
                     ByteBufUtils.writeUTF8String(buf, msg.getFrom());
                 }
-//                ByteBufUtils.writeUTF8StringPrefix2ByteLength(buf, msg.getContent());
                 ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, msg.getContent());
-                if(null != msg.getMessageId()){
-                    buf.writeLong(msg.getMessageId());
-                }
+                buf.writeByte(0x00);
+                ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, MD5.getMD5(String.valueOf(System.currentTimeMillis())).getBytes());
                 break;
             }
 
@@ -79,11 +74,9 @@ public class SimpleMessageDecoderAndEncoder implements PacketDecoder<SimpleMessa
                     ByteBufUtils.writeUTF8String(buf, msg.getFromGroup());
                     ByteBufUtils.writeUTF8String(buf, msg.getFrom());
                 }
-//                ByteBufUtils.writeUTF8StringPrefix2ByteLength(buf, msg.getContent());
                 ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, msg.getContent());
-                if(null != msg.getMessageId()){
-                    buf.writeLong(msg.getMessageId());
-                }
+                buf.writeByte(0x00);
+                ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, MD5.getMD5(String.valueOf(System.currentTimeMillis())).getBytes());
                 break;
             }
 
@@ -157,7 +150,6 @@ public class SimpleMessageDecoderAndEncoder implements PacketDecoder<SimpleMessa
                 if (TextMessagePacket.TO_USER == messageServiceType) {
                     String fromUser = ByteBufUtils.readUTF8String(buf, 32);
                     int len = buf.readUnsignedShort();
-//                    String content = ByteBufUtils.readUTF8String(buf, len);
                     byte[] content = ByteBufUtils.readByteArray(buf, len);
                     textMessagePacket.setFrom(fromUser);
                     textMessagePacket.setContent(content);
@@ -192,7 +184,7 @@ public class SimpleMessageDecoderAndEncoder implements PacketDecoder<SimpleMessa
                     String fromUser = ByteBufUtils.readUTF8String(buf, 32);
                     int len = buf.readUnsignedShort();
                     byte[] content = ByteBufUtils.readByteArray(buf, len);
-                    imageMessagePacket.setToUser(fromUser);
+                    imageMessagePacket.setFrom(fromUser);
                     imageMessagePacket.setContent(content);
                     imageMessagePacket.setMessageId(buf.readLong());
                     result = imageMessagePacket;
@@ -224,7 +216,7 @@ public class SimpleMessageDecoderAndEncoder implements PacketDecoder<SimpleMessa
                     String fromUser = ByteBufUtils.readUTF8String(buf, 32);
                     int len = buf.readUnsignedShort();
                     byte[] content = ByteBufUtils.readByteArray(buf, len);
-                    voicePacket.setToUser(fromUser);
+                    voicePacket.setFrom(fromUser);
                     voicePacket.setContent(content);
                     voicePacket.setMessageId(buf.readLong());
                     result = voicePacket;
@@ -298,7 +290,7 @@ public class SimpleMessageDecoderAndEncoder implements PacketDecoder<SimpleMessa
             }
 
             case StatusMessagePacket.STATUS_RESPONSE_MESSAGE_TYPE: {
-                StatusMessagePacket statusMessagePacket = new StatusMessagePacket();
+                StatusResponsePackage statusMessagePacket = new StatusResponsePackage();
                 statusMessagePacket.setMessageType(messageType);
                 statusMessagePacket.setMessageServiceType(messageServiceType);
 

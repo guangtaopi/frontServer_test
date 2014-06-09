@@ -13,6 +13,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -125,6 +126,12 @@ public class ClientChannelNettyImpl implements ClientChannel {
     @Override
     public String getRemoteIp() {
         return channelHandlerContext.channel().remoteAddress().toString();
+    }
+
+    @Override
+    public int getRemotePort() {
+        InetSocketAddress socketAddress = (InetSocketAddress) channelHandlerContext.channel().remoteAddress();
+        return socketAddress.getPort();
     }
 
     public Channel getChannel(){

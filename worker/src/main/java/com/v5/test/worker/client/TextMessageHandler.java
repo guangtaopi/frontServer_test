@@ -40,8 +40,7 @@ public class TextMessageHandler extends AbstractPacketHandler<TextMessagePacket>
         ClientChannelNettyImpl clientChannelNetty = (ClientChannelNettyImpl)clientChannel;
         String receive = clientOnclientManager.getUserByChannel(clientChannelNetty.getChannel());
         String from = packet.getFrom();
-        String content = new String(packet.getContent(), Charset.forName("utf-8"));
-        eventPublisher.send(EventPath.USER_MSG_RECEIVE,from,receive,content,System.currentTimeMillis());
-        tcpService.sendAckMessage(from, packet.getMessageId());
+        eventPublisher.send(EventPath.USER_MSG_RECEIVE,from,receive,packet,System.currentTimeMillis());
+        tcpService.sendAckMessage(receive, packet.getMessageId());
     }
 }

@@ -5,7 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.v5.base.client.ClientChannel;
 import com.v5.base.client.OnlineClient;
 import com.v5.base.client.UserInfo;
-import com.v5.base.utils.AsyncInvokeExceptoin;
+import com.v5.base.utils.AsyncInvokeException;
 import com.v5.base.utils.SimpleCallback;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
@@ -74,7 +74,7 @@ public class ClientOnclientManager implements InitializingBean{
         clientCount.dec();
     }
 
-    public void getClient(final Serializable id, final SimpleCallback<OnlineClient, AsyncInvokeExceptoin> callback) {
+    public void getClient(final Serializable id, final SimpleCallback<OnlineClient, AsyncInvokeException> callback) {
 
         if (callback == null) {
             return;

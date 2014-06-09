@@ -29,3 +29,5 @@ bin
 logs/*
 *.log
 data/*
+worker/target
+worker/*.iml
