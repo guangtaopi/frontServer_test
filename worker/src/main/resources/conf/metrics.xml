@@ -17,7 +17,7 @@
     <metrics:annotation-driven metric-registry="metrics" />
 
     <!-- (Optional) Registry should be defined in only one context XML file -->
-    <metrics:reporter type="console" metric-registry="metrics" period="10s" />
+    <!--<metrics:reporter type="console" metric-registry="metrics" period="10s" />-->
 
     <metrics:reporter type="slf4j" metric-registry="metrics" period="60s" logger="com.metrics" marker="foobar" rate-unit="MINUTES" duration-unit="MICROSECONDS" />
 
