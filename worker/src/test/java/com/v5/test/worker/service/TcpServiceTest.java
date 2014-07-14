@@ -1,8 +1,11 @@
 package com.v5.test.worker.service;
 
+import com.v5.base.packet.PacketHead;
 import com.v5.test.worker.bean.MessageInfo;
 import com.v5.test.worker.bean.TaskSnapshort;
 import com.v5.test.worker.client.ClientOnclientManager;
+import com.v5.test.worker.client.gameCall.GameCallPacket;
+import com.v5.test.worker.client.gameCall.GameCallReqPacket;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,11 +45,17 @@ public class TcpServiceTest {
         //insert into user_session_indexes(session_id,user_id,app_id) values('cfcd208495d565ef66e7dff9f98764da','c4ca4238a0b923820dcc509a6f75849b',0);
         //insert into user_sessions(session_id,user_id,app_id) values('cfcd208495d565ef66e7dff9f98764da','c4ca4238a0b923820dcc509a6f75849b',0);
         //insert into users(id,nickname,user_type,mobile_verify,app_id,create_time) values('c4ca4238a0b923820dcc509a6f75849b','test',0,0,0,'2014-03-11 13:40:14+0800');
+//        String userId = "6a6e0440d68b11e384f669f51b0e7dca";
+//        String sessionId = "025f0c1ffa11474a8efc5eb0b1d9c6de";
+
+        String userId = "6a6e0440d68b11e384f669f51b0e7dca";
+        String sessionId = userId;
+
         List<String> userIds = new ArrayList<>();
-        userIds.add("c4ca4238a0b923820dcc509a6f75849b");
+        userIds.add(userId);
 
         //初始化用户的nameMd5和sessionId
-        onclientManager.saveSession("cfcd208495d565ef66e7dff9f98764da", "c4ca4238a0b923820dcc509a6f75849b");
+        onclientManager.saveSession(sessionId, userId);
 
         for(int i = 0;i<userIds.size();i++){
             tcpService.connect(userIds.get(i));
@@ -99,6 +108,34 @@ public class TcpServiceTest {
 
     }
 
+    @Test
+    public void testSendGameCallReqPacket() throws InterruptedException {
+        String userId = TaskSnapshort.loginedUserSet.take();
+        GameCallReqPacket gameCallReqPacket = new GameCallReqPacket();
+        PacketHead packetHead = new PacketHead();
+        packetHead.setVersion((byte)0x04);
+        packetHead.setPacketType(GameCallReqPacket.COMMAND_PACKET_TYPE);
+        gameCallReqPacket.setPacketHead(packetHead);
+
+
+        gameCallReqPacket.setCallType(GameCallPacket.CallType.CALL);
+        gameCallReqPacket.setPeerName(userId);
+        gameCallReqPacket.setSsrc(new byte[]{(byte)0x01,(byte)0x02});
+        gameCallReqPacket.setSubCallTypes(new Integer[]{(int)GameCallPacket.SUB_CALL_TYPE_VIDEO,0x03});
+
+        gameCallReqPacket.setExtraData(new byte[]{(byte)0x01,(byte)0x02,(byte)0x03});
+
+
+        //发送game呼叫
+        tcpService.sendGameCallReqPacket(userId,gameCallReqPacket);
+
+        //等待game呼叫的响应
+
+
+        //发送已经接受
+
+        System.out.println("over");
+    }
 
     private void noExit() {
         while (true) {

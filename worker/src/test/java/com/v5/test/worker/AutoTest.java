@@ -4,6 +4,9 @@ import com.v5.base.message.command.CallStatus;
 import com.v5.base.message.command.UDPServerPacket;
 import com.v5.base.message.notify.SystemNotifyPackage;
 import com.v5.base.message.text.*;
+import com.v5.test.worker.client.gameCall.GameCallPacket;
+import com.v5.test.worker.client.gameCall.GameCallRespPacket;
+import com.v5.test.worker.client.gameCall.GameServerRespPacket;
 import com.v5.test.worker.handler.ITestResultHandler;
 import com.v5.test.worker.packet.StatusResponsePackage;
 
@@ -33,6 +36,9 @@ public class AutoTest implements ITestResultHandler {
     private ConcurrentHashMap<String, CountDownLatch> systemNotifyCountDownLatch = new ConcurrentHashMap<>();
 
 
+
+
+
     /**
      * 呼叫状态映射
      * key:from+"_"+to+"_"+callstatus
@@ -44,6 +50,13 @@ public class AutoTest implements ITestResultHandler {
     private ConcurrentHashMap<String, UDPServerPacket> callUDPServerPacketMap = new ConcurrentHashMap();
     private ConcurrentHashMap<String, CountDownLatch> callUDPServerPacketLatchMap = new ConcurrentHashMap();
 
+
+    private GameCallRespPacket gameCallRespPacket;
+    private ConcurrentHashMap<GameCallPacket.CallType, CountDownLatch> gameCallCountDownLatch = new ConcurrentHashMap<>();
+
+
+    private ConcurrentHashMap<String, GameServerRespPacket> userGameServerInfo = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, CountDownLatch> userGameServerCountDownlatch = new ConcurrentHashMap<>();
 
     @Override
     public void receiveSingleTextMsg(String from, String to, TextMessagePacket packet, long recTime) {
@@ -127,6 +140,25 @@ public class AutoTest implements ITestResultHandler {
     }
 
 
+    @Override
+    public void receiveGameCallRespPacket(String from, String to, GameCallRespPacket packet, long recTime) {
+        gameCallRespPacket = packet;
+        CountDownLatch latch = gameCallCountDownLatch.get(packet.getCallType());
+        if (null != latch) {
+            latch.countDown();
+        }
+    }
+
+    @Override
+    public void receiveGameServerInfo(String userId, GameServerRespPacket respPacket, long currenTime) {
+        userGameServerInfo.put(userId,respPacket);
+        CountDownLatch latch = userGameServerCountDownlatch.get(userId);
+        if (null != latch) {
+            latch.countDown();
+        }
+    }
+
+
     public static String getCallStatusKey(String from, String to, CallStatus callStatus) {
         return from + "_" + to + "_" + callStatus.id();
     }
@@ -181,5 +213,22 @@ public class AutoTest implements ITestResultHandler {
 
     public ConcurrentHashMap<String, CountDownLatch> getSystemNotifyCountDownLatch() {
         return systemNotifyCountDownLatch;
+    }
+
+
+    public GameCallRespPacket getGameCallRespPacket() {
+        return gameCallRespPacket;
+    }
+
+    public ConcurrentHashMap<GameCallPacket.CallType, CountDownLatch> getGameCallCountDownLatch() {
+        return gameCallCountDownLatch;
+    }
+
+    public ConcurrentHashMap<String, GameServerRespPacket> getUserGameServerInfo() {
+        return userGameServerInfo;
+    }
+
+    public ConcurrentHashMap<String, CountDownLatch> getUserGameServerCountDownlatch() {
+        return userGameServerCountDownlatch;
     }
 }

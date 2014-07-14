@@ -29,6 +29,7 @@ public class LoginHandler extends AbstractPacketHandler<LoginResponsePacket> {
 
     @Override
     public void handler(ClientChannel clientChannel, LoginResponsePacket packet) {
+        LOGGER.debug("[login response].packet:{},clientChannel:{}",packet,clientChannel);
         switch (packet.getLoginStatus()) {
             case SUCCESS:
                 Channel channel = (Channel) clientChannel.getAttribute("channel");

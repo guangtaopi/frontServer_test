@@ -43,8 +43,10 @@ public class SimpleMessageDecoderAndEncoder implements PacketDecoder<SimpleMessa
                     ByteBufUtils.writeUTF8String(buf, msg.getFrom());
                 }
                 ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, msg.getContent());
-                buf.writeByte(0x00);
-                ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, MD5.getMD5(String.valueOf(System.currentTimeMillis())).getBytes());
+                buf.writeByte(msg.getMsgFlag());
+                if(null != msg.getCmsgid()){
+                    ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, msg.getCmsgid().getBytes());
+                }
                 break;
             }
 
@@ -59,8 +61,10 @@ public class SimpleMessageDecoderAndEncoder implements PacketDecoder<SimpleMessa
                     ByteBufUtils.writeUTF8String(buf, msg.getFrom());
                 }
                 ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, msg.getContent());
-                buf.writeByte(0x00);
-                ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, MD5.getMD5(String.valueOf(System.currentTimeMillis())).getBytes());
+                buf.writeByte(msg.getMsgFlag());
+                if(null != msg.getCmsgid()){
+                    ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, msg.getCmsgid().getBytes());
+                }
                 break;
             }
 
@@ -75,8 +79,10 @@ public class SimpleMessageDecoderAndEncoder implements PacketDecoder<SimpleMessa
                     ByteBufUtils.writeUTF8String(buf, msg.getFrom());
                 }
                 ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, msg.getContent());
-                buf.writeByte(0x00);
-                ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, MD5.getMD5(String.valueOf(System.currentTimeMillis())).getBytes());
+                buf.writeByte(msg.getMsgFlag());
+                if(null != msg.getCmsgid()){
+                    ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, msg.getCmsgid().getBytes());
+                }
                 break;
             }
 
@@ -90,10 +96,11 @@ public class SimpleMessageDecoderAndEncoder implements PacketDecoder<SimpleMessa
                     ByteBufUtils.writeUTF8String(buf, msg.getFromGroup());
                     ByteBufUtils.writeUTF8String(buf, msg.getFrom());
                 }
-//                ByteBufUtils.writeUTF8StringPrefix2ByteLength(buf, msg.getContent());
                 ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, msg.getContent());
-                if(null != msg.getMessageId()){
-                    buf.writeLong(msg.getMessageId());
+                ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, msg.getContent());
+                buf.writeByte(msg.getMsgFlag());
+                if(null != msg.getCmsgid()){
+                    ByteBufUtils.writeByteArrayPrefix2ByteLength(buf, msg.getCmsgid().getBytes());
                 }
                 break;
             }

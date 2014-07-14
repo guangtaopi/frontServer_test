@@ -6,9 +6,14 @@ import com.v5.base.packet.PacketHead;
 import com.v5.test.worker.AutoTest;
 import com.v5.test.worker.bean.TaskSnapshort;
 import com.v5.test.worker.client.ClientOnclientManager;
+import com.v5.test.worker.client.gameCall.GameCallHandupReqPacket;
+import com.v5.test.worker.client.gameCall.GameCallPacket;
+import com.v5.test.worker.client.gameCall.GameCallReqPacket;
+import com.v5.test.worker.client.gameCall.GameCallRespPacket;
 import com.v5.test.worker.service.TcpService;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,20 +63,43 @@ public class TestMain {
 
     private static AtomicInteger tempId = new AtomicInteger(1);
 
-    private static int awaitTimeMilliSecond =100;
+    private static int awaitTimeMilliSecond = 2000;
 
     @Before
     public void before() throws Exception {
         //tcp连接进行一次操作
         if (!isInit.getAndSet(true)) {
-            String userId1 = "c4ca4238a0b923820dcc509a6f75849b";
-            String sessionId1 = "c4ca4238a0b923820dcc509a6f75849b";
+//            String userId1 = "6a6e0440d68b11e384f669f51b0e7dca";
+//            String sessionId1 = "0cd5c32ee50a4a35b068bd43e221138b";
+//
+//            String userId2 = "19050f3005bc11e4a5a669f51b0e7dca";
+//            String sessionId2 = "21875f773b9a40b9845209e54b78a9ec";
 
 //            String userId1 = "6a6e0440d68b11e384f669f51b0e7dca";
-//            String sessionId1 = "025f0c1ffa11474a8efc5eb0b1d9c6de";
+//            String sessionId1 = "6a6e0440d68b11e384f669f51b0e7dca";
+//
+//            String userId2 = "2ae70f20d68f11e384f669f51b0e7dca";
+//            String sessionId2 = "2ae70f20d68f11e384f669f51b0e7dca";
 
-            String userId2 = "6a6e0440d68b11e384f669f51b0e7dca";
-            String sessionId2 = "6a6e0440d68b11e384f669f51b0e7dca";
+//            String userId2 = userId1;
+//            String sessionId2 = sessionId1;
+
+
+//            String userId1 = "e763ac40d03511e3bbf113abbfd80b2e";
+//            String sessionId1 = "e3e56ad9a1cb474288a1f4f620474dbd";
+//
+//            String userId2 = "0ac94f80e54b11e3bde571bafaff7945";
+//            String sessionId2 = "d0b16b98a7314147acb78328ea6b065a";
+
+            //现网环境
+            String userId1 = "e763ac40d03511e3bbf113abbfd80b2e";
+            String sessionId1 = "7a8eabe140bd45c2bb9b61a6b5a9fcbd";
+
+            String userId2 = "0ac94f80e54b11e3bde571bafaff7945";
+            String sessionId2 = "d0b16b98a7314147acb78328ea6b065a";
+
+
+
             List<String> userIds = new ArrayList<>();
             userIds.add(userId1);
             userIds.add(userId2);
@@ -101,22 +129,23 @@ public class TestMain {
         simpleMessagePacket.setContent(textMsg.getBytes(Charset.forName("utf-8")));
         simpleMessagePacket.setMessageServiceType(SimpleMessagePacket.TO_USER);
 
+
         PacketHead head = new PacketHead();
         head.setTempId(tempId.getAndIncrement());
         simpleMessagePacket.setPacketHead(head);
 
         CountDownLatch latch = new CountDownLatch(1);
-        autoTest.getIdStatusLatchMap().put(head.getTempId(),latch);
+        autoTest.getIdStatusLatchMap().put(head.getTempId(), latch);
 
         CountDownLatch packetLatch = new CountDownLatch(1);
-        autoTest.getPacketTypeCountDownLatch().put(TextMessagePacket.TEXT_MESSAGE_PACKET_TYPE,packetLatch);
+        autoTest.getPacketTypeCountDownLatch().put(TextMessagePacket.TEXT_MESSAGE_PACKET_TYPE, packetLatch);
 
         tcpService.sendSimpleMessagePacket(simpleMessagePacket);
 
-        latch.await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
+        latch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
         Assert.assertEquals(MessageStatus.SERVER_RECEIVED, autoTest.getIdStatusMap().get(head.getTempId()));
 
-        packetLatch.await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
+        packetLatch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
         TextMessagePacket responsePacket = autoTest.getReceiveTextMsg();
         Assert.assertNotNull(responsePacket);
         Assert.assertEquals(textMsg, new String(responsePacket.getContent(), "utf-8"));
@@ -137,18 +166,18 @@ public class TestMain {
         packet.setPacketHead(head);
 
         CountDownLatch latch = new CountDownLatch(1);
-        autoTest.getIdStatusLatchMap().put(head.getTempId(),latch);
+        autoTest.getIdStatusLatchMap().put(head.getTempId(), latch);
 
         CountDownLatch packetLatch = new CountDownLatch(1);
-        autoTest.getPacketTypeCountDownLatch().put(ForwardMessagePacket.FORWARD_MESSAGE_PACKET_TYPE,packetLatch);
+        autoTest.getPacketTypeCountDownLatch().put(ForwardMessagePacket.FORWARD_MESSAGE_PACKET_TYPE, packetLatch);
 
         tcpService.sendSimpleMessagePacket(packet);
 
-        latch.await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
+        latch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
         //转发消息，服务端不发送状态响应
         Assert.assertNull(autoTest.getIdStatusMap().get(head.getTempId()));
 
-        packetLatch.await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
+        packetLatch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
         ForwardMessagePacket responsePacket = autoTest.getReceiveForwardMsg();
         Assert.assertNotNull(responsePacket);
         Assert.assertEquals(transMsg, new String(responsePacket.getData(), "utf-8"));
@@ -168,7 +197,7 @@ public class TestMain {
         imageMessagePacket.setPacketHead(head);
 
         CountDownLatch idStatusLatch = new CountDownLatch(1);
-        autoTest.getIdStatusLatchMap().put(head.getTempId(),idStatusLatch);
+        autoTest.getIdStatusLatchMap().put(head.getTempId(), idStatusLatch);
 
         CountDownLatch packetLatch = new CountDownLatch(1);
         autoTest.getPacketTypeCountDownLatch().put(ImageMessagePacket.IMAGE_MESSAGE_PACKET_TYPE, packetLatch);
@@ -176,10 +205,10 @@ public class TestMain {
 
         tcpService.sendSimpleMessagePacket(imageMessagePacket);
 
-        idStatusLatch.await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
+        idStatusLatch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
         Assert.assertEquals(MessageStatus.SERVER_RECEIVED, autoTest.getIdStatusMap().get(head.getTempId()));
 
-        packetLatch.await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
+        packetLatch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
         ImageMessagePacket responsePacket = autoTest.getImageMessagePacket();
         Assert.assertNotNull(responsePacket);
         Assert.assertEquals(imageContent, new String(responsePacket.getContent(), "utf-8"));
@@ -199,15 +228,15 @@ public class TestMain {
         voiceMessagePacket.setPacketHead(head);
 
         CountDownLatch idStatusLatch = new CountDownLatch(1);
-        autoTest.getIdStatusLatchMap().put(head.getTempId(),idStatusLatch);
+        autoTest.getIdStatusLatchMap().put(head.getTempId(), idStatusLatch);
 
 
         CountDownLatch packetLatch = new CountDownLatch(1);
-        autoTest.getIdStatusLatchMap().put(VoiceMessagePacket.VOICE_MESSAGE_PACKET_TYPE,packetLatch);
+        autoTest.getIdStatusLatchMap().put(VoiceMessagePacket.VOICE_MESSAGE_PACKET_TYPE, packetLatch);
 
         tcpService.sendSimpleMessagePacket(voiceMessagePacket);
 
-        idStatusLatch.await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
+        idStatusLatch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
 
         //服务端返回消息已经接受到
         Assert.assertEquals(MessageStatus.SERVER_RECEIVED, autoTest.getIdStatusMap().get(head.getTempId()));
@@ -230,7 +259,7 @@ public class TestMain {
         videoCallPacket.setCallStatus(CallStatus.VIDEO_REQUEST);
 
         CountDownLatch latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.VIDEO_REQUEST),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.VIDEO_REQUEST), latch);
 
         tcpService.sendVideoCall(fromUserId, videoCallPacket);
 
@@ -245,7 +274,7 @@ public class TestMain {
         videoCallPacket.setCallStatus(CallStatus.VIDEO_REQUEST_AGAIN);
 
         latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.VIDEO_REQUEST_AGAIN),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.VIDEO_REQUEST_AGAIN), latch);
 
         tcpService.sendVideoCall(fromUserId, videoCallPacket);
 
@@ -256,21 +285,21 @@ public class TestMain {
         videoCallPacket = new CallPacket();
         videoCallPacket.setPeerName(fromUserId);
         videoCallPacket.setCallStatus(CallStatus.RECEIVED);
-        if(fromUserId.equals(toUserId)){
-           latch = new CountDownLatch(2);
-            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId,latch);
-        }else{
+        if (fromUserId.equals(toUserId)) {
+            latch = new CountDownLatch(2);
+            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId, latch);
+        } else {
             latch = new CountDownLatch(1);
-            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId,latch);
+            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId, latch);
             latch = new CountDownLatch(1);
-            autoTest.getCallUDPServerPacketLatchMap().put(toUserId,latch);
+            autoTest.getCallUDPServerPacketLatchMap().put(toUserId, latch);
         }
 
         tcpService.sendVideoCall(toUserId, videoCallPacket);
 
         //发送方和接受方接受到UDP包
-        autoTest.getCallUDPServerPacketLatchMap().get(fromUserId).await(1000,TimeUnit.MILLISECONDS);
-        autoTest.getCallUDPServerPacketLatchMap().get(toUserId).await(1000,TimeUnit.MILLISECONDS);
+        autoTest.getCallUDPServerPacketLatchMap().get(fromUserId).await(1000, TimeUnit.MILLISECONDS);
+        autoTest.getCallUDPServerPacketLatchMap().get(toUserId).await(1000, TimeUnit.MILLISECONDS);
         Assert.assertNotNull(autoTest.getCallUDPServerPacketMap().get(fromUserId));
         Assert.assertNotNull(autoTest.getCallUDPServerPacketMap().get(toUserId));
 
@@ -280,12 +309,12 @@ public class TestMain {
         videoCallPacket.setCallStatus(CallStatus.VIDEO_ACCEPT);
 
         latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.VIDEO_ACCEPT),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.VIDEO_ACCEPT), latch);
 
-        tcpService.sendVideoCall(toUserId,videoCallPacket);
+        tcpService.sendVideoCall(toUserId, videoCallPacket);
 
         latch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(autoTest.getCallStatusMap().get(AutoTest.getCallStatusKey(fromUserId,toUserId,CallStatus.VIDEO_ACCEPT)));
+        Assert.assertTrue(autoTest.getCallStatusMap().get(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.VIDEO_ACCEPT)));
 
         //接受方发送挂断
         videoCallPacket = new CallPacket();
@@ -293,12 +322,12 @@ public class TestMain {
         videoCallPacket.setCallStatus(CallStatus.HANGUP);
 
         latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.HANGUP),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.HANGUP), latch);
 
-        tcpService.sendVideoCall(toUserId,videoCallPacket);
+        tcpService.sendVideoCall(toUserId, videoCallPacket);
 
         latch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(autoTest.getCallStatusMap().get(AutoTest.getCallStatusKey(fromUserId,toUserId,CallStatus.HANGUP)));
+        Assert.assertTrue(autoTest.getCallStatusMap().get(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.HANGUP)));
 
     }
 
@@ -314,7 +343,7 @@ public class TestMain {
         audioCallPacket.setCallStatus(CallStatus.AUDIO_REQUEST);
 
         CountDownLatch latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.AUDIO_REQUEST),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.AUDIO_REQUEST), latch);
 
         tcpService.sendVideoCall(fromUserId, audioCallPacket);
 
@@ -329,7 +358,7 @@ public class TestMain {
         audioCallPacket.setCallStatus(CallStatus.AUDIO_REQUEST_AGAIN);
 
         latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.AUDIO_REQUEST_AGAIN),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.AUDIO_REQUEST_AGAIN), latch);
 
         tcpService.sendVideoCall(fromUserId, audioCallPacket);
 
@@ -340,21 +369,21 @@ public class TestMain {
         audioCallPacket = new CallPacket();
         audioCallPacket.setPeerName(fromUserId);
         audioCallPacket.setCallStatus(CallStatus.RECEIVED);
-        if(fromUserId.equals(toUserId)){
+        if (fromUserId.equals(toUserId)) {
             latch = new CountDownLatch(2);
-            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId,latch);
-        }else{
+            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId, latch);
+        } else {
             latch = new CountDownLatch(1);
-            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId,latch);
+            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId, latch);
             latch = new CountDownLatch(1);
-            autoTest.getCallUDPServerPacketLatchMap().put(toUserId,latch);
+            autoTest.getCallUDPServerPacketLatchMap().put(toUserId, latch);
         }
 
         tcpService.sendVideoCall(toUserId, audioCallPacket);
 
         //发送方和接受方接受到UDP包
-        autoTest.getCallUDPServerPacketLatchMap().get(fromUserId).await(1000,TimeUnit.MILLISECONDS);
-        autoTest.getCallUDPServerPacketLatchMap().get(toUserId).await(1000,TimeUnit.MILLISECONDS);
+        autoTest.getCallUDPServerPacketLatchMap().get(fromUserId).await(1000, TimeUnit.MILLISECONDS);
+        autoTest.getCallUDPServerPacketLatchMap().get(toUserId).await(1000, TimeUnit.MILLISECONDS);
         Assert.assertNotNull(autoTest.getCallUDPServerPacketMap().get(fromUserId));
         Assert.assertNotNull(autoTest.getCallUDPServerPacketMap().get(toUserId));
 
@@ -364,12 +393,12 @@ public class TestMain {
         audioCallPacket.setCallStatus(CallStatus.AUDIO_ACCEPT);
 
         latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.AUDIO_ACCEPT),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.AUDIO_ACCEPT), latch);
 
-        tcpService.sendVideoCall(toUserId,audioCallPacket);
+        tcpService.sendVideoCall(toUserId, audioCallPacket);
 
         latch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(autoTest.getCallStatusMap().get(AutoTest.getCallStatusKey(fromUserId,toUserId,CallStatus.AUDIO_ACCEPT)));
+        Assert.assertTrue(autoTest.getCallStatusMap().get(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.AUDIO_ACCEPT)));
 
         //接受方发送挂断
         audioCallPacket = new CallPacket();
@@ -377,12 +406,12 @@ public class TestMain {
         audioCallPacket.setCallStatus(CallStatus.HANGUP);
 
         latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.HANGUP),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.HANGUP), latch);
 
-        tcpService.sendVideoCall(toUserId,audioCallPacket);
+        tcpService.sendVideoCall(toUserId, audioCallPacket);
 
         latch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(autoTest.getCallStatusMap().get(AutoTest.getCallStatusKey(fromUserId,toUserId,CallStatus.HANGUP)));
+        Assert.assertTrue(autoTest.getCallStatusMap().get(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.HANGUP)));
 
     }
 
@@ -397,7 +426,7 @@ public class TestMain {
         videoCallPacket.setCallStatus(CallStatus.VIDEO_REQUEST);
 
         CountDownLatch latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.VIDEO_REQUEST),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.VIDEO_REQUEST), latch);
 
         tcpService.sendVideoCall(fromUserId, videoCallPacket);
 
@@ -412,7 +441,7 @@ public class TestMain {
         videoCallPacket.setCallStatus(CallStatus.VIDEO_REQUEST_AGAIN);
 
         latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.VIDEO_REQUEST_AGAIN),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.VIDEO_REQUEST_AGAIN), latch);
 
         tcpService.sendVideoCall(fromUserId, videoCallPacket);
 
@@ -423,21 +452,21 @@ public class TestMain {
         videoCallPacket = new CallPacket();
         videoCallPacket.setPeerName(fromUserId);
         videoCallPacket.setCallStatus(CallStatus.RECEIVED);
-        if(fromUserId.equals(toUserId)){
+        if (fromUserId.equals(toUserId)) {
             latch = new CountDownLatch(2);
-            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId,latch);
-        }else{
+            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId, latch);
+        } else {
             latch = new CountDownLatch(1);
-            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId,latch);
-            latch = new CountDownLatch(1);
-            autoTest.getCallUDPServerPacketLatchMap().put(toUserId,latch);
+            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId, latch);
+            CountDownLatch toLatch = new CountDownLatch(1);
+            autoTest.getCallUDPServerPacketLatchMap().put(toUserId, toLatch);
         }
 
         tcpService.sendVideoCall(toUserId, videoCallPacket);
 
         //发送方和接受方接受到UDP包
-        autoTest.getCallUDPServerPacketLatchMap().get(fromUserId).await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
-        autoTest.getCallUDPServerPacketLatchMap().get(toUserId).await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
+        autoTest.getCallUDPServerPacketLatchMap().get(fromUserId).await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
+        autoTest.getCallUDPServerPacketLatchMap().get(toUserId).await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
         Assert.assertNotNull(autoTest.getCallUDPServerPacketMap().get(fromUserId));
         Assert.assertNotNull(autoTest.getCallUDPServerPacketMap().get(toUserId));
 
@@ -447,12 +476,12 @@ public class TestMain {
         videoCallPacket.setCallStatus(CallStatus.REJECT);
 
         latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId,toUserId, CallStatus.REJECT),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.REJECT), latch);
 
-        tcpService.sendVideoCall(toUserId,videoCallPacket);
+        tcpService.sendVideoCall(toUserId, videoCallPacket);
 
         latch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(autoTest.getCallStatusMap().get(AutoTest.getCallStatusKey(fromUserId,toUserId,CallStatus.REJECT)));
+        Assert.assertTrue(autoTest.getCallStatusMap().get(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.REJECT)));
 
     }
 
@@ -469,7 +498,7 @@ public class TestMain {
         audioCallPacket.setCallStatus(CallStatus.AUDIO_REQUEST);
 
         CountDownLatch latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.AUDIO_REQUEST),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.AUDIO_REQUEST), latch);
 
         tcpService.sendVideoCall(fromUserId, audioCallPacket);
 
@@ -484,7 +513,7 @@ public class TestMain {
         audioCallPacket.setCallStatus(CallStatus.AUDIO_REQUEST_AGAIN);
 
         latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.AUDIO_REQUEST_AGAIN),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.AUDIO_REQUEST_AGAIN), latch);
 
         tcpService.sendVideoCall(fromUserId, audioCallPacket);
 
@@ -497,12 +526,12 @@ public class TestMain {
         audioCallPacket.setCallStatus(CallStatus.BUSY);
 
         latch = new CountDownLatch(1);
-        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.BUSY),latch);
+        autoTest.getCallStatusLatchMap().put(AutoTest.getCallStatusKey(fromUserId, toUserId, CallStatus.BUSY), latch);
 
-        tcpService.sendVideoCall(toUserId,audioCallPacket);
+        tcpService.sendVideoCall(toUserId, audioCallPacket);
 
         latch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(autoTest.getCallStatusMap().get(AutoTest.getCallStatusKey(toUserId,fromUserId,CallStatus.BUSY)));
+        Assert.assertTrue(autoTest.getCallStatusMap().get(AutoTest.getCallStatusKey(toUserId, fromUserId, CallStatus.BUSY)));
 
     }
 
@@ -519,42 +548,42 @@ public class TestMain {
         head.setTempId(tempId.getAndIncrement());
         notifyPackage.setPacketHead(head);
         CountDownLatch idStatusLatch = new CountDownLatch(1);
-        autoTest.getIdStatusLatchMap().put(head.getTempId(),idStatusLatch);
+        autoTest.getIdStatusLatchMap().put(head.getTempId(), idStatusLatch);
 
-        notifyPackage.setMsgType((byte)0x00);
+        notifyPackage.setMsgType((byte) 0x00);
 
         //需要确认
-        notifyPackage.setServeType((byte)0x01);
+        notifyPackage.setServeType((byte) 0x01);
 
         notifyPackage.setFrom(fromUserId);
         notifyPackage.setTo(toUserId);
         notifyPackage.setExpired(0l);
         String pushContent = "push_test";
-        notifyPackage.setPushContentLength((short)pushContent.length());
+        notifyPackage.setPushContentLength((short) pushContent.length());
         notifyPackage.setPushContentBody(pushContent);
-        notifyPackage.setMesssageLength((short)systemNotifyContent.length());
+        notifyPackage.setMesssageLength((short) systemNotifyContent.length());
         notifyPackage.setMessageBody(systemNotifyContent);
         notifyPackage.setMsgId(0);
 
         CountDownLatch notifyLatch = new CountDownLatch(1);
-        autoTest.getSystemNotifyCountDownLatch().put(toUserId,notifyLatch);
+        autoTest.getSystemNotifyCountDownLatch().put(toUserId, notifyLatch);
 
-        tcpService.sendSystemNofify(fromUserId,notifyPackage);
+        tcpService.sendSystemNofify(fromUserId, notifyPackage);
 
-        notifyLatch.await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
-        idStatusLatch.await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
+        notifyLatch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
+        idStatusLatch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
 
         //服务端返回消息已经接受到
         Assert.assertEquals(MessageStatus.SERVER_RECEIVED, autoTest.getIdStatusMap().get(head.getTempId()));
         SystemNotifyPackage receiveSystemNotify = autoTest.getSystemNotifyPackage();
         Assert.assertNotNull(receiveSystemNotify);
-        Assert.assertEquals(fromUserId,receiveSystemNotify.getFrom());
-        Assert.assertEquals(toUserId,receiveSystemNotify.getTo());
-        Assert.assertEquals(notifyPackage.getExpired(),receiveSystemNotify.getExpired());
-        Assert.assertEquals(notifyPackage.getPushContentLength(),receiveSystemNotify.getPushContentLength());
-        Assert.assertEquals(notifyPackage.getPushContentBody(),receiveSystemNotify.getPushContentBody());
-        Assert.assertEquals(notifyPackage.getMesssageLength(),receiveSystemNotify.getMesssageLength());
-        Assert.assertEquals(notifyPackage.getMessageBody(),receiveSystemNotify.getMessageBody());
+        Assert.assertEquals(fromUserId, receiveSystemNotify.getFrom());
+        Assert.assertEquals(toUserId, receiveSystemNotify.getTo());
+        Assert.assertEquals(notifyPackage.getExpired(), receiveSystemNotify.getExpired());
+        Assert.assertEquals(notifyPackage.getPushContentLength(), receiveSystemNotify.getPushContentLength());
+        Assert.assertEquals(notifyPackage.getPushContentBody(), receiveSystemNotify.getPushContentBody());
+        Assert.assertEquals(notifyPackage.getMesssageLength(), receiveSystemNotify.getMesssageLength());
+        Assert.assertEquals(notifyPackage.getMessageBody(), receiveSystemNotify.getMessageBody());
         Assert.assertTrue(receiveSystemNotify.getMsgId() > 0);
 
     }
@@ -572,41 +601,418 @@ public class TestMain {
         head.setTempId(tempId.getAndIncrement());
         notifyPackage.setPacketHead(head);
         CountDownLatch idStatusLatch = new CountDownLatch(1);
-        autoTest.getIdStatusLatchMap().put(head.getTempId(),idStatusLatch);
+        autoTest.getIdStatusLatchMap().put(head.getTempId(), idStatusLatch);
 
-        notifyPackage.setMsgType((byte)0x00);
+        notifyPackage.setMsgType((byte) 0x00);
 
         //需要确认
-        notifyPackage.setServeType((byte)0x00);
+        notifyPackage.setServeType((byte) 0x00);
 
         notifyPackage.setFrom(fromUserId);
         notifyPackage.setTo(toUserId);
         notifyPackage.setExpired(0l);
-        notifyPackage.setPushContentLength((short)0);
-        notifyPackage.setMesssageLength((short)systemNotifyContent.length());
+        notifyPackage.setPushContentLength((short) 0);
+        notifyPackage.setMesssageLength((short) systemNotifyContent.length());
         notifyPackage.setMessageBody(systemNotifyContent);
         notifyPackage.setMsgId(0);
 
         CountDownLatch notifyLatch = new CountDownLatch(1);
-        autoTest.getSystemNotifyCountDownLatch().put(toUserId,notifyLatch);
+        autoTest.getSystemNotifyCountDownLatch().put(toUserId, notifyLatch);
 
-        tcpService.sendSystemNofify(fromUserId,notifyPackage);
+        tcpService.sendSystemNofify(fromUserId, notifyPackage);
 
-        notifyLatch.await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
-        idStatusLatch.await(awaitTimeMilliSecond,TimeUnit.MILLISECONDS);
+        notifyLatch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
+        idStatusLatch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
 
         //服务端返回消息已经接受到
         Assert.assertEquals(MessageStatus.SERVER_RECEIVED, autoTest.getIdStatusMap().get(head.getTempId()));
         SystemNotifyPackage receiveSystemNotify = autoTest.getSystemNotifyPackage();
         Assert.assertNotNull(receiveSystemNotify);
-        Assert.assertEquals(fromUserId,receiveSystemNotify.getFrom());
-        Assert.assertEquals(toUserId,receiveSystemNotify.getTo());
-        Assert.assertEquals(notifyPackage.getExpired(),receiveSystemNotify.getExpired());
-        Assert.assertEquals(notifyPackage.getPushContentLength(),receiveSystemNotify.getPushContentLength());
-        Assert.assertEquals(notifyPackage.getPushContentBody(),receiveSystemNotify.getPushContentBody());
-        Assert.assertEquals(notifyPackage.getMesssageLength(),receiveSystemNotify.getMesssageLength());
-        Assert.assertEquals(notifyPackage.getMessageBody(),receiveSystemNotify.getMessageBody());
-        Assert.assertEquals(0,receiveSystemNotify.getMsgId());
+        Assert.assertEquals(fromUserId, receiveSystemNotify.getFrom());
+        Assert.assertEquals(toUserId, receiveSystemNotify.getTo());
+        Assert.assertEquals(notifyPackage.getExpired(), receiveSystemNotify.getExpired());
+        Assert.assertEquals(notifyPackage.getPushContentLength(), receiveSystemNotify.getPushContentLength());
+        Assert.assertEquals(notifyPackage.getPushContentBody(), receiveSystemNotify.getPushContentBody());
+        Assert.assertEquals(notifyPackage.getMesssageLength(), receiveSystemNotify.getMesssageLength());
+        Assert.assertEquals(notifyPackage.getMessageBody(), receiveSystemNotify.getMessageBody());
+        Assert.assertEquals(0, receiveSystemNotify.getMsgId());
     }
+
+
+    @Test
+//    @Ignore
+    public void testSendGameCallReqPacket() throws InterruptedException {
+
+        GameCallReqPacket gameCallReqPacket = new GameCallReqPacket();
+        PacketHead packetHead = new PacketHead();
+        packetHead.setVersion((byte) 0x04);
+        packetHead.setPacketType(GameCallReqPacket.COMMAND_PACKET_TYPE);
+        gameCallReqPacket.setPacketHead(packetHead);
+
+
+        gameCallReqPacket.setCallType(GameCallPacket.CallType.CALL);
+        gameCallReqPacket.setPeerName(toUserId);
+        gameCallReqPacket.setSsrc(new byte[]{(byte) 0x01, (byte) 0x02});
+        gameCallReqPacket.setSubCallTypes(new Integer[]{(int) GameCallPacket.SUB_CALL_TYPE_VIDEO, 1000});
+
+        gameCallReqPacket.setExtraData(new byte[]{(byte) 0x01, (byte) 0x02, (byte) 0x03});
+
+
+        CountDownLatch callLatch = new CountDownLatch(1);
+        autoTest.getGameCallCountDownLatch().put(GameCallPacket.CallType.CALL, callLatch);
+
+        //发送game呼叫
+        tcpService.sendGameCallReqPacket(fromUserId, gameCallReqPacket);
+
+        callLatch.await();
+        GameCallRespPacket respPacket = autoTest.getGameCallRespPacket();
+        Assert.assertNotNull(respPacket);
+
+        //等待game呼叫的响应
+        if (fromUserId.equals(toUserId)) {
+            callLatch = new CountDownLatch(2);
+            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId, callLatch);
+        } else {
+            callLatch = new CountDownLatch(1);
+            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId, callLatch);
+            CountDownLatch toCallLatch = new CountDownLatch(1);
+            autoTest.getCallUDPServerPacketLatchMap().put(toUserId, toCallLatch);
+        }
+
+        //接受方发送已经接受到指令
+        gameCallReqPacket.setPeerName(fromUserId);
+        gameCallReqPacket.setCallType(GameCallPacket.CallType.RECEIVED);
+        tcpService.sendGameCallReqPacket(toUserId, gameCallReqPacket);
+
+        autoTest.getCallUDPServerPacketLatchMap().get(fromUserId).await();
+        autoTest.getCallUDPServerPacketLatchMap().get(toUserId).await();
+        Assert.assertNotNull(autoTest.getCallUDPServerPacketMap().get(fromUserId));
+        Assert.assertNotNull(autoTest.getCallUDPServerPacketMap().get(toUserId));
+
+        //发送辅助呼叫
+        callLatch = new CountDownLatch(1);
+        autoTest.getGameCallCountDownLatch().put(GameCallPacket.CallType.ASSIST_CALL, callLatch);
+        gameCallReqPacket.setPeerName(toUserId);
+        gameCallReqPacket.setCallType(GameCallPacket.CallType.ASSIST_CALL);
+        tcpService.sendGameCallReqPacket(fromUserId, gameCallReqPacket);
+
+        callLatch.await();
+        respPacket = autoTest.getGameCallRespPacket();
+        Assert.assertNotNull(respPacket);
+        Assert.assertEquals(GameCallPacket.CallType.ASSIST_CALL, respPacket.getCallType());
+
+        //发送接受指令
+        callLatch = new CountDownLatch(1);
+        autoTest.getGameCallCountDownLatch().put(GameCallPacket.CallType.ACCEPTE, callLatch);
+
+        //等待game呼叫的响应
+        if (fromUserId.equals(toUserId)) {
+            CountDownLatch gameServerLatch = new CountDownLatch(2);
+            autoTest.getUserGameServerCountDownlatch().put(fromUserId, gameServerLatch);
+        } else {
+            CountDownLatch gameServerLatch = new CountDownLatch(1);
+            autoTest.getUserGameServerCountDownlatch().put(fromUserId, gameServerLatch);
+            CountDownLatch toGameServerLatch = new CountDownLatch(1);
+            autoTest.getUserGameServerCountDownlatch().put(toUserId, toGameServerLatch);
+        }
+
+
+        gameCallReqPacket.setPeerName(fromUserId);
+        gameCallReqPacket.setCallType(GameCallPacket.CallType.ACCEPTE);
+        tcpService.sendGameCallReqPacket(toUserId, gameCallReqPacket);
+
+        callLatch.await();
+        respPacket = autoTest.getGameCallRespPacket();
+        Assert.assertNotNull(respPacket);
+        Assert.assertEquals(GameCallPacket.CallType.ACCEPTE, respPacket.getCallType());
+
+
+        //测试 game server包
+        autoTest.getUserGameServerCountDownlatch().get(fromUserId).await();
+        autoTest.getUserGameServerCountDownlatch().get(toUserId).await();
+        Assert.assertNotNull(autoTest.getUserGameServerInfo().get(fromUserId));
+        Assert.assertNotNull(autoTest.getUserGameServerInfo().get(toUserId));
+
+        //测试 忙
+        callLatch = new CountDownLatch(1);
+        autoTest.getGameCallCountDownLatch().put(GameCallPacket.CallType.BUSY, callLatch);
+        gameCallReqPacket.setPeerName(fromUserId);
+        gameCallReqPacket.setCallType(GameCallPacket.CallType.BUSY);
+        tcpService.sendGameCallReqPacket(toUserId, gameCallReqPacket);
+        callLatch.await();
+        respPacket = autoTest.getGameCallRespPacket();
+        Assert.assertNotNull(respPacket);
+
+        //测试 挂断
+        callLatch = new CountDownLatch(1);
+        autoTest.getGameCallCountDownLatch().put(GameCallPacket.CallType.HANGUP, callLatch);
+        GameCallHandupReqPacket handupReqPacket = new GameCallHandupReqPacket();
+        handupReqPacket.setPacketHead(packetHead);
+
+
+        handupReqPacket.setCallType(GameCallPacket.CallType.CALL);
+        handupReqPacket.setPeerName(toUserId);
+        handupReqPacket.setSsrc(new byte[]{(byte) 0x01, (byte) 0x02});
+        handupReqPacket.setSubCallTypes(new Integer[]{(int) GameCallPacket.SUB_CALL_TYPE_VIDEO, 0x03});
+
+        handupReqPacket.setExtraData(new byte[]{(byte) 0x01, (byte) 0x02, (byte) 0x03});
+
+        handupReqPacket.setPeerName(fromUserId);
+        handupReqPacket.setCallType(GameCallPacket.CallType.HANGUP);
+        handupReqPacket.setDesCode(GameCallHandupReqPacket.DesCode.UN_ACCEPT);
+
+        tcpService.sendGameCallReqPacket(toUserId, handupReqPacket);
+        callLatch.await();
+        respPacket = autoTest.getGameCallRespPacket();
+        Assert.assertNotNull(respPacket);
+
+        //测试 拒绝
+        callLatch = new CountDownLatch(1);
+        autoTest.getGameCallCountDownLatch().put(GameCallPacket.CallType.REJECT, callLatch);
+        gameCallReqPacket.setPeerName(fromUserId);
+        gameCallReqPacket.setCallType(GameCallPacket.CallType.REJECT);
+        tcpService.sendGameCallReqPacket(toUserId, gameCallReqPacket);
+        callLatch.await();
+        respPacket = autoTest.getGameCallRespPacket();
+        Assert.assertNotNull(respPacket);
+
+        System.out.println("over");
+    }
+
+//    @Test
+//    public void testSendGameCallReqPacketWithoutGame() throws InterruptedException {
+//
+//        GameCallReqPacket gameCallReqPacket = new GameCallReqPacket();
+//        PacketHead packetHead = new PacketHead();
+//        packetHead.setVersion((byte) 0x04);
+//        packetHead.setPacketType(GameCallReqPacket.COMMAND_PACKET_TYPE);
+//        gameCallReqPacket.setPacketHead(packetHead);
+//
+//
+//        gameCallReqPacket.setCallType(GameCallPacket.CallType.CALL);
+//        gameCallReqPacket.setPeerName(toUserId);
+//        gameCallReqPacket.setSsrc(new byte[]{(byte) 0x01, (byte) 0x02});
+//        gameCallReqPacket.setSubCallTypes(new Integer[]{0x03});
+//
+//        gameCallReqPacket.setExtraData(new byte[]{(byte) 0x01, (byte) 0x02, (byte) 0x03});
+//
+//
+//        CountDownLatch callLatch = new CountDownLatch(1);
+//        autoTest.getGameCallCountDownLatch().put(GameCallPacket.CallType.CALL, callLatch);
+//
+//        //发送game呼叫
+//        tcpService.sendGameCallReqPacket(fromUserId, gameCallReqPacket);
+//
+//        callLatch.await();
+//        GameCallRespPacket respPacket = autoTest.getGameCallRespPacket();
+//        Assert.assertNotNull(respPacket);
+//
+//        //等待game呼叫的响应
+//        if (fromUserId.equals(toUserId)) {
+//            callLatch = new CountDownLatch(2);
+//            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId, callLatch);
+//        } else {
+//            callLatch = new CountDownLatch(1);
+//            autoTest.getCallUDPServerPacketLatchMap().put(fromUserId, callLatch);
+//            CountDownLatch toCallLatch = new CountDownLatch(1);
+//            autoTest.getCallUDPServerPacketLatchMap().put(toUserId, toCallLatch);
+//        }
+//
+//        //接受方发送已经接受到指令
+//        gameCallReqPacket.setPeerName(fromUserId);
+//        gameCallReqPacket.setCallType(GameCallPacket.CallType.RECEIVED);
+//        tcpService.sendGameCallReqPacket(toUserId, gameCallReqPacket);
+//
+//        autoTest.getCallUDPServerPacketLatchMap().get(fromUserId).await();
+//        autoTest.getCallUDPServerPacketLatchMap().get(toUserId).await();
+//        Assert.assertNotNull(autoTest.getCallUDPServerPacketMap().get(fromUserId));
+//        Assert.assertNotNull(autoTest.getCallUDPServerPacketMap().get(toUserId));
+//
+//        //发送辅助呼叫
+//        callLatch = new CountDownLatch(1);
+//        autoTest.getGameCallCountDownLatch().put(GameCallPacket.CallType.ASSIST_CALL, callLatch);
+//        gameCallReqPacket.setPeerName(toUserId);
+//        gameCallReqPacket.setCallType(GameCallPacket.CallType.ASSIST_CALL);
+//        tcpService.sendGameCallReqPacket(fromUserId, gameCallReqPacket);
+//
+//        callLatch.await();
+//        respPacket = autoTest.getGameCallRespPacket();
+//        Assert.assertNotNull(respPacket);
+//        Assert.assertEquals(GameCallPacket.CallType.ASSIST_CALL, respPacket.getCallType());
+//
+//        //发送接受指令
+//        callLatch = new CountDownLatch(1);
+//        autoTest.getGameCallCountDownLatch().put(GameCallPacket.CallType.ACCEPTE, callLatch);
+//
+//        //等待game呼叫的响应
+//        if (fromUserId.equals(toUserId)) {
+//            CountDownLatch gameServerLatch = new CountDownLatch(2);
+//            autoTest.getUserGameServerCountDownlatch().put(fromUserId, gameServerLatch);
+//        } else {
+//            CountDownLatch gameServerLatch = new CountDownLatch(1);
+//            autoTest.getUserGameServerCountDownlatch().put(fromUserId, gameServerLatch);
+//            CountDownLatch toGameServerLatch = new CountDownLatch(1);
+//            autoTest.getUserGameServerCountDownlatch().put(toUserId, toGameServerLatch);
+//        }
+//
+//
+//        gameCallReqPacket.setPeerName(fromUserId);
+//        gameCallReqPacket.setCallType(GameCallPacket.CallType.ACCEPTE);
+//        tcpService.sendGameCallReqPacket(toUserId, gameCallReqPacket);
+//
+//        callLatch.await();
+//        respPacket = autoTest.getGameCallRespPacket();
+//        Assert.assertNotNull(respPacket);
+//        Assert.assertEquals(GameCallPacket.CallType.ACCEPTE, respPacket.getCallType());
+//
+//
+//        //测试 game server包
+//        autoTest.getUserGameServerCountDownlatch().get(fromUserId).await();
+//        autoTest.getUserGameServerCountDownlatch().get(toUserId).await();
+//        Assert.assertNotNull(autoTest.getUserGameServerInfo().get(fromUserId));
+//        Assert.assertNotNull(autoTest.getUserGameServerInfo().get(toUserId));
+//
+//        //测试 忙
+//        callLatch = new CountDownLatch(1);
+//        autoTest.getGameCallCountDownLatch().put(GameCallPacket.CallType.BUSY, callLatch);
+//        gameCallReqPacket.setPeerName(fromUserId);
+//        gameCallReqPacket.setCallType(GameCallPacket.CallType.BUSY);
+//        tcpService.sendGameCallReqPacket(toUserId, gameCallReqPacket);
+//        callLatch.await();
+//        respPacket = autoTest.getGameCallRespPacket();
+//        Assert.assertNotNull(respPacket);
+//
+//        //测试 挂断
+//        callLatch = new CountDownLatch(1);
+//        autoTest.getGameCallCountDownLatch().put(GameCallPacket.CallType.HANGUP, callLatch);
+//        GameCallHandupReqPacket handupReqPacket = new GameCallHandupReqPacket();
+//        handupReqPacket.setPacketHead(packetHead);
+//
+//
+//        handupReqPacket.setCallType(GameCallPacket.CallType.CALL);
+//        handupReqPacket.setPeerName(toUserId);
+//        handupReqPacket.setSsrc(new byte[]{(byte) 0x01, (byte) 0x02});
+//        handupReqPacket.setSubCallTypes(new Integer[]{(int) GameCallPacket.SUB_CALL_TYPE_VIDEO, 0x03});
+//
+//        handupReqPacket.setExtraData(new byte[]{(byte) 0x01, (byte) 0x02, (byte) 0x03});
+//
+//        handupReqPacket.setPeerName(fromUserId);
+//        handupReqPacket.setCallType(GameCallPacket.CallType.HANGUP);
+//        handupReqPacket.setDesCode(GameCallHandupReqPacket.DesCode.UN_ACCEPT);
+//
+//        tcpService.sendGameCallReqPacket(toUserId, handupReqPacket);
+//        callLatch.await();
+//        respPacket = autoTest.getGameCallRespPacket();
+//        Assert.assertNotNull(respPacket);
+//
+//        //测试 拒绝
+//        callLatch = new CountDownLatch(1);
+//        autoTest.getGameCallCountDownLatch().put(GameCallPacket.CallType.REJECT, callLatch);
+//        gameCallReqPacket.setPeerName(fromUserId);
+//        gameCallReqPacket.setCallType(GameCallPacket.CallType.REJECT);
+//        tcpService.sendGameCallReqPacket(toUserId, gameCallReqPacket);
+//        callLatch.await();
+//        respPacket = autoTest.getGameCallRespPacket();
+//        Assert.assertNotNull(respPacket);
+//
+//        System.out.println("over");
+//    }
+
+
+    @Test
+    public void testReSendSimpleTextMsgWithZeroFlag() throws InterruptedException, UnsupportedEncodingException {
+        byte msgFlag = (byte) 0x00;
+        String cmsgId = "10aa"+System.currentTimeMillis();
+
+        TextMessagePacket simpleMessagePacket = new TextMessagePacket();
+        simpleMessagePacket.setFrom(fromUserId);
+        simpleMessagePacket.setToUser(toUserId);
+        simpleMessagePacket.setContent(textMsg.getBytes(Charset.forName("utf-8")));
+        simpleMessagePacket.setMessageServiceType(SimpleMessagePacket.TO_USER);
+        simpleMessagePacket.setCmsgid(cmsgId);
+
+
+        PacketHead head = new PacketHead();
+        head.setTempId(tempId.getAndIncrement());
+        simpleMessagePacket.setPacketHead(head);
+
+        CountDownLatch latch = new CountDownLatch(1);
+        autoTest.getIdStatusLatchMap().put(head.getTempId(), latch);
+
+        CountDownLatch packetLatch = new CountDownLatch(1);
+        autoTest.getPacketTypeCountDownLatch().put(TextMessagePacket.TEXT_MESSAGE_PACKET_TYPE, packetLatch);
+
+        //第一次发送
+        simpleMessagePacket.setMsgFlag(msgFlag);
+        tcpService.sendSimpleMessagePacket(simpleMessagePacket);
+
+        msgFlag = (byte)0x01;
+        //第二次发送
+        simpleMessagePacket.setMsgFlag(msgFlag);
+        tcpService.sendSimpleMessagePacket(simpleMessagePacket);
+
+        //第二次发送
+        simpleMessagePacket.setMsgFlag(msgFlag);
+        tcpService.sendSimpleMessagePacket(simpleMessagePacket);
+
+        latch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(MessageStatus.SERVER_RECEIVED, autoTest.getIdStatusMap().get(head.getTempId()));
+
+        packetLatch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
+        TextMessagePacket responsePacket = autoTest.getReceiveTextMsg();
+        Assert.assertNotNull(responsePacket);
+        Assert.assertEquals(textMsg, new String(responsePacket.getContent(), "utf-8"));
+        Assert.assertEquals(fromUserId, responsePacket.getFrom());
+        Assert.assertTrue(responsePacket.getMessageId() > 0);
+    }
+
+    @Test
+    public void testReSendSimpleTextMsgWithoutZeroFlag() throws InterruptedException, UnsupportedEncodingException {
+        byte msgFlag = (byte) 0x01;
+        String cmsgId = "10aa"+System.currentTimeMillis();
+
+        TextMessagePacket simpleMessagePacket = new TextMessagePacket();
+        simpleMessagePacket.setFrom(fromUserId);
+        simpleMessagePacket.setToUser(toUserId);
+        simpleMessagePacket.setContent(textMsg.getBytes(Charset.forName("utf-8")));
+        simpleMessagePacket.setMessageServiceType(SimpleMessagePacket.TO_USER);
+        simpleMessagePacket.setCmsgid(cmsgId);
+
+
+        PacketHead head = new PacketHead();
+        head.setTempId(tempId.getAndIncrement());
+        simpleMessagePacket.setPacketHead(head);
+
+        CountDownLatch latch = new CountDownLatch(1);
+        autoTest.getIdStatusLatchMap().put(head.getTempId(), latch);
+
+        CountDownLatch packetLatch = new CountDownLatch(1);
+        autoTest.getPacketTypeCountDownLatch().put(TextMessagePacket.TEXT_MESSAGE_PACKET_TYPE, packetLatch);
+
+        //第一次发送
+        simpleMessagePacket.setMsgFlag(msgFlag);
+        tcpService.sendSimpleMessagePacket(simpleMessagePacket);
+
+        msgFlag = (byte)0x01;
+        //第二次发送
+        simpleMessagePacket.setMsgFlag(msgFlag);
+        tcpService.sendSimpleMessagePacket(simpleMessagePacket);
+
+        //第二次发送
+        simpleMessagePacket.setMsgFlag(msgFlag);
+        tcpService.sendSimpleMessagePacket(simpleMessagePacket);
+
+        latch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(MessageStatus.SERVER_RECEIVED, autoTest.getIdStatusMap().get(head.getTempId()));
+
+        packetLatch.await(awaitTimeMilliSecond, TimeUnit.MILLISECONDS);
+        TextMessagePacket responsePacket = autoTest.getReceiveTextMsg();
+        Assert.assertNotNull(responsePacket);
+        Assert.assertEquals(textMsg, new String(responsePacket.getContent(), "utf-8"));
+        Assert.assertEquals(fromUserId, responsePacket.getFrom());
+        Assert.assertTrue(responsePacket.getMessageId() > 0);
+    }
+
+
 }
 

@@ -35,4 +35,9 @@ public interface EventPath {
     String USER_CALL_UDP_SERVER_RECEIVE = "/user/call/udpServer/receive";
 
     String USER_SYSTEM_NOTIFY_RECEIVE = "/user/systemNotify/receive";
+
+    String USER_GAME_CALL_RECEIVE = "/user/gamecall/receive";
+
+    String USER_GAME_SERVER_RECEIVE = "/user/gameserver/receive";
+
 }

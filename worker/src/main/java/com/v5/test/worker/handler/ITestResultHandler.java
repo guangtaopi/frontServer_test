@@ -7,6 +7,8 @@ import com.v5.base.message.text.ForwardMessagePacket;
 import com.v5.base.message.text.ImageMessagePacket;
 import com.v5.base.message.text.TextMessagePacket;
 import com.v5.base.message.text.VoiceMessagePacket;
+import com.v5.test.worker.client.gameCall.GameCallRespPacket;
+import com.v5.test.worker.client.gameCall.GameServerRespPacket;
 import com.v5.test.worker.packet.StatusResponsePackage;
 
 /**
@@ -29,4 +31,8 @@ public interface ITestResultHandler {
     void receiveUDPServerPacket(String userId,UDPServerPacket packet);
 
     void receiveSystemNotify(String receiver,SystemNotifyPackage notifyPackage);
+
+    void receiveGameCallRespPacket(String from, String to, GameCallRespPacket packet, long recTime);
+
+    void receiveGameServerInfo(String userId,GameServerRespPacket respPacket,long currenTime);
 }

@@ -38,5 +38,9 @@
 
     <bean name="testResultHandler" class="com.v5.test.worker.AutoTest" />
 
+    <bean name="gameCallHandler" class="com.v5.test.worker.client.gameCall.GameCallHandler" />
+
+    <bean name="gameServerHandler" class="com.v5.test.worker.client.gameCall.GameServerRespHandler" />
+
 
 </beans>

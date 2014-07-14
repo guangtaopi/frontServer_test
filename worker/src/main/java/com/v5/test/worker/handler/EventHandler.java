@@ -13,6 +13,8 @@ import com.v5.test.worker.bean.TaskSnapshort;
 import com.v5.test.worker.bean.User;
 import com.v5.test.worker.client.ClientOnclientManager;
 import com.v5.test.worker.client.ForwardMessageHandler;
+import com.v5.test.worker.client.gameCall.GameCallRespPacket;
+import com.v5.test.worker.client.gameCall.GameServerRespPacket;
 import com.v5.test.worker.constant.EventPath;
 import com.v5.test.worker.packet.StatusResponsePackage;
 import com.v5.test.worker.service.MessageLogService;
@@ -138,6 +140,20 @@ public class EventHandler {
     public void receiveSystemNotify(String receiver,SystemNotifyPackage notifyPackage){
         if(null != testResultHandler){
             testResultHandler.receiveSystemNotify(receiver,notifyPackage);
+        }
+    }
+
+    @On(EventPath.USER_GAME_CALL_RECEIVE)
+    public void receiveGameCallPacket(String from,String to,GameCallRespPacket respPacket,long currenTime){
+        if(null != testResultHandler){
+            testResultHandler.receiveGameCallRespPacket(from,to,respPacket,currenTime);
+        }
+    }
+
+    @On(EventPath.USER_GAME_SERVER_RECEIVE)
+    public void receiveGameCallPacket(String userId,GameServerRespPacket respPacket,long currenTime){
+        if(null != testResultHandler){
+            testResultHandler.receiveGameServerInfo(userId,respPacket,currenTime);
         }
     }
 

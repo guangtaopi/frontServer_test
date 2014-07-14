@@ -14,6 +14,7 @@ import com.v5.test.worker.bean.MessageInfo;
 import com.v5.test.worker.bean.TaskSnapshort;
 import com.v5.test.worker.client.ClientChannelInitializer;
 import com.v5.test.worker.client.ClientOnclientManager;
+import com.v5.test.worker.client.gameCall.GameCallReqPacket;
 import com.v5.test.worker.constant.EventPath;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -200,6 +201,16 @@ public class TcpService implements InitializingBean{
             @Override
             public void success(OnlineClient result) {
                 result.getClientChannel().write(notifyPackage);
+            }
+        });
+    }
+
+
+    public void sendGameCallReqPacket(final String from,final GameCallReqPacket reqPacket){
+        onclientManager.getClient(from, new DefaultCallBack<OnlineClient>() {
+            @Override
+            public void success(OnlineClient result) {
+                result.getClientChannel().write(reqPacket);
             }
         });
     }
