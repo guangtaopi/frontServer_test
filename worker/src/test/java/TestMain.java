@@ -69,11 +69,12 @@ public class TestMain {
     public void before() throws Exception {
         //tcp连接进行一次操作
         if (!isInit.getAndSet(true)) {
-//            String userId1 = "6a6e0440d68b11e384f669f51b0e7dca";
-//            String sessionId1 = "0cd5c32ee50a4a35b068bd43e221138b";
-//
-//            String userId2 = "19050f3005bc11e4a5a669f51b0e7dca";
-//            String sessionId2 = "21875f773b9a40b9845209e54b78a9ec";
+            //测试环境用户
+            String userId1 = "6a6e0440d68b11e384f669f51b0e7dca";
+            String sessionId1 = "0cd5c32ee50a4a35b068bd43e221138b";
+
+            String userId2 = "19050f3005bc11e4a5a669f51b0e7dca";
+            String sessionId2 = "21875f773b9a40b9845209e54b78a9ec";
 
 //            String userId1 = "6a6e0440d68b11e384f669f51b0e7dca";
 //            String sessionId1 = "6a6e0440d68b11e384f669f51b0e7dca";
@@ -92,11 +93,11 @@ public class TestMain {
 //            String sessionId2 = "d0b16b98a7314147acb78328ea6b065a";
 
             //现网环境
-            String userId1 = "e763ac40d03511e3bbf113abbfd80b2e";
-            String sessionId1 = "7a8eabe140bd45c2bb9b61a6b5a9fcbd";
-
-            String userId2 = "0ac94f80e54b11e3bde571bafaff7945";
-            String sessionId2 = "d0b16b98a7314147acb78328ea6b065a";
+//            String userId1 = "e763ac40d03511e3bbf113abbfd80b2e";
+//            String sessionId1 = "7a8eabe140bd45c2bb9b61a6b5a9fcbd";
+//
+//            String userId2 = "0ac94f80e54b11e3bde571bafaff7945";
+//            String sessionId2 = "d0b16b98a7314147acb78328ea6b065a";
 
 
 
